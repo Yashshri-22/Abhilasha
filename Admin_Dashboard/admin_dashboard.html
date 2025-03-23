@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="admin.dashboard.css">
+</head>
+<body>
+
+<!-- Sidebar Navigation -->
+<div class="sidebar">
+    <h2>Admin Dashboard</h2>
+    <ul>
+        <li onclick="loadPage('pages/home/home.html')">
+            <img src="../Assets/Home.png" alt="Home Icon"> Home
+        </li>
+        <li onclick="loadPage('pages/all_applicants/all_applicants.html')">
+            <img src="../Assets/profile.png" alt="Schemes Icon"> All Applicants
+        </li>
+        <li onclick="loadPage('pages/all_schemes/all_schemes.html')">
+            <img src="../Assets/Signing A Document.png" alt="Applied Schemes Icon"> All Schemes
+        </li>
+        <li onclick="loadPage('pages/Logout/Logout.html')">
+            <img src="../Assets/Logout.png" alt="Logout"> Logout
+        </li>
+    </ul>    
+</div>
+
+<!-- Main Content -->
+<div class="content" id="mainContent">
+    <iframe id="mainFrame" src="pages/home/home.html" frameborder="0"></iframe>
+</div>
+
+<script src="admin_dashboard.js"></script>
+</body>
+</html>

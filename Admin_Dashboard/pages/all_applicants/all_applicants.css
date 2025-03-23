@@ -1,0 +1,131 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: #f4f4f4;
+}
+
+.container {
+    width: 95%;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    min-height: max-content;
+}
+
+#header {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center; 
+    width: 100%;
+    padding: 20px 0; 
+    border-bottom: 1px solid #053a68; 
+}
+
+h2 {
+    margin: 0; 
+    flex-grow: 1;
+    text-align: left;
+    color: #053a68;
+}
+
+.search-container {
+    position: relative;
+    max-width: 250px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: white;
+    padding: 5px;
+    transition: border-color 0.3s ease-in-out;
+}
+
+/* Apply border change on input focus */
+#searchUDID:focus {
+    border: none; /* Remove internal border */
+    outline: none;
+}
+
+/* Highlight the whole container when input is focused */
+.search-container:has(#searchUDID:focus) {
+    border: 1px solid #053a68; /* Blue border when input is active */
+}
+
+.search-icon {
+    width: 20px;
+    margin-left: 5px;
+}
+
+#searchUDID {
+    width: 100%;
+    border: none;
+    outline: none;
+    padding-left: 10px;
+    font-size: 14px;
+    background: transparent;
+}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+table,
+th,
+td {
+    border: 1px solid #ddd;
+}
+
+th,
+td {
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #053a68;
+    color: white;
+}
+
+.viewButton {
+    background-color: #e67e22;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 5px;
+}
+
+.viewButton:hover {
+    background-color: #f39c12;
+}
+
+.backButton {
+    background-color: #053a68;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 5px;
+    /* margin-bottom: 10px; */
+    display: block;
+    text-align: left;
+}
+
+.backButton:hover {
+    background-color: #042a50;
+}
+
+.view {
+    text-align: center;
+}

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Schemes</title>
+    <link rel="stylesheet" href="all_applicants.css">
+    <!-- <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> -->
+</head>
+
+<body>
+
+    <div class="container">
+        <div id="header">
+            <h2>Applicants List</h2>
+            <div class="search-container">
+                <img class="search-icon" src="../../../Assets/search.png">
+                <input type="text" id="searchUDID" placeholder="Search by UDID" onkeyup="filterApplicants()">
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th class="view">#</th>
+                    <th>Applicant Name</th>
+                    <th>UDID</th>
+                    <th>Scheme Name</th>
+                    <th>Date</th>
+                    <th class="view">Application</th>
+                </tr>
+            </thead>
+            <tbody id="applicantsTable">
+                <!-- Data will be loaded dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="all_applicants.js"></script>
+
+</body>
+
+</html>

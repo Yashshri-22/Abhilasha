@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="home.css">
+</head>
+
+<body>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="hero-overlay">
+            <h1>Admin Dashboard</h1>
+        </div>
+    </div>
+
+    <!-- Cards Section -->
+    <div class="cards-container">
+        <div class="card" onclick="navigateTo('profile')">
+            <img src="../../../Assets//admin_home_icons/applicants.png" alt="total_applicants">
+            <h3>1063</h3>
+            <h4>Total Applicants</h4>
+        </div>
+        <div class="card" onclick="navigateTo('schemes')">
+            <img src="../../../Assets//admin_home_icons/waiting.png" alt="waiting">
+            <h3>90</h3>
+            <h4>Waiting</h4>
+        </div>
+        <div class="card" onclick="navigateTo('appliedSchemes')">
+            <img src="../../../Assets//admin_home_icons/approved.png" alt="approved">
+            <h3>20</h3>
+            <h4>Approved</h4>
+        </div>
+        <div class="card" onclick="navigateTo('cancelledSchemes')">
+            <img src="../../../Assets//admin_home_icons/rejected.png" alt="rejected">
+            <h3>10</h3>
+            <h4>Rejected</h4>
+        </div>
+    </div>
+
+    <script>
+        function navigateTo(page) {
+            window.location.href = `../${page}/${page}.html`;
+        }
+    </script>
+
+</body>
+
+</html>
