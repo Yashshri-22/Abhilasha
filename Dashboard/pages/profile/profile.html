@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Dashboard</title>
+    <link rel="stylesheet" href="profile.css">
+    <script defer src="profile.js"></script>
+</head>
+
+<body>
+    <div class="main-container">
+        <header>
+            <h2>My Profile</h2>
+            <div class="progress-bar">
+                <div class="progress" id="progress-bar"></div>
+            </div>
+            <p id="progress-text">Profile Completion: 0%</p>
+        </header>
+
+        <section class="card-container">
+            <!-- Personal Details -->
+            <div class="card" onclick="togglePersonalSection()">
+                <h2>Personal Details <span class="toggle-icon">+</span></h2>
+                <div class="details" id="personal-details" style="display: none;">
+                    <iframe id="personal-frame" src="details/personal.html" width="100%" height="600px"
+                        style="border: none;"></iframe>
+                </div>
+            </div>
+
+
+            <!-- Education Background -->
+            <div class="card" onclick="toggleEducationSection()">
+                <h2>Education Background <span class="toggle-icon">+</span></h2>
+                <div class="details" id="education-details" style="display: none;">
+                    <iframe id="education-frame" src="details/education.html" width="100%" height="500px"
+                        style="border: none;"></iframe>
+                </div>
+            </div>
+
+
+            <!-- Documents upload -->
+            <div class="card" onclick="toggleDocumentSection()">
+                <h2>Document Uploads <span class="toggle-icon">+</span></h2>
+                <div class="details" id="document-details" style="display: none;">
+                    <iframe id="document-frame" src="details/document.html" width="100%" height="500px"
+                        style="border: none;"></iframe>
+                </div>
+            </div>
+
+            <!-- Bank Details -->
+            <div class="card" onclick="toggleBankSection()">
+                <h2>Bank Details <span class="toggle-icon">+</span></h2>
+                <div class="details" id="bank-details" style="display: none;">
+                    <iframe id="bank-frame" src="details/bankDetails.html" width="100%" height="500px"
+                        style="border: none;"></iframe>
+                </div>
+            </div>
+
+            <!-- Divyang Details -->
+            <div class="card" onclick="toggleDivyangSection()">
+                <h2>Divyang Details <span class="toggle-icon">+</span></h2>
+                <div class="details" id="divyang-details" style="display: none;">
+                    <iframe id="divyang-frame" src="details/DivyangDetails.html" width="100%" height="500px"
+                        style="border: none;"></iframe>
+                </div>
+            </div>
+
+            <!-- Questions -->
+            <div class="card" onclick="toggleDivyangSection()">
+                <h2>Additional Information <span class="toggle-icon">+</span></h2>
+                <div class="details" id="divyang-details" style="display: none;">
+                    <iframe id="question-frame" src="details/Question.html" width="100%" height="500px"
+                        style="border: none;"></iframe>
+                </div>
+            </div>
+
+            <button id="reset-btn" class="reset-btn">Reset Profile</button>
+
+        </section>
+    </div>
+</body>
+
+</html>

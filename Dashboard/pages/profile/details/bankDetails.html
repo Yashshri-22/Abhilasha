@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7f9;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            background: white;
+            position: relative;
+        }
+
+        form label {
+            display: block;
+            margin-top: 15px;
+            text-align: left;
+            font-size: 16px;
+        }
+
+        input {
+            width: 95%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 2px solid #939393;
+            font-size: 16px;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            text-align: left;
+            margin-top: 5px;
+        }
+
+        button {
+            background-color: #e67e22;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+            display: block;
+            margin: 20px auto;
+        }
+
+        button:hover {
+            background: #ff7700;
+        }
+
+        .message {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form id="bank-form">
+            <label>Bank Name: 
+                <input type="text" name="bank_name" placeholder="Enter Bank Name" required>
+            </label>
+
+            <label>IFSC Code: 
+                <input type="text" id="ifsc_code" name="ifsc_code" placeholder="Enter IFSC Code" required>
+                <div class="error" id="ifsc-error"></div>
+            </label>
+
+            <label>Account Number: 
+                <input type="text" id="account_number" name="account_number" placeholder="Enter Account Number" required>
+                <div class="error" id="account-error"></div>
+            </label>
+
+            <label>Annual Income: 
+                <input type="text" id="annual_income" name="annual_income" placeholder="Enter Annual Income" required>
+                <div class="error" id="income-error"></div>
+            </label>
+
+            <button id="save-btn" type="submit">Save</button>
+        </form>
+        <div class="message" id="bank-success-message">Bank details submitted successfully.</div>
+    </div>
+
+    <script>
+        document.getElementById("bank-form").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            // Hide success message initially
+            document.getElementById("bank-success-message").style.display = "none";
+
+            let isValid = true;
+
+            // Validate IFSC Code (Must be exactly 11 alphanumeric characters)
+            let ifscInput = document.getElementById("ifsc_code").value;
+            let ifscError = document.getElementById("ifsc-error");
+            if (!/^[A-Za-z0-9]{11}$/.test(ifscInput)) {
+                ifscError.textContent = "IFSC Code must be exactly 11 alphanumeric characters.";
+                isValid = false;
+            } else {
+                ifscError.textContent = "";
+            }
+
+            // Validate Account Number (Only numbers, max 17 digits)
+            let accountInput = document.getElementById("account_number").value;
+            let accountError = document.getElementById("account-error");
+            if (!/^\d{1,17}$/.test(accountInput)) {
+                accountError.textContent = "Account Number must contain only numbers (Max 17 digits).";
+                isValid = false;
+            } else {
+                accountError.textContent = "";
+            }
+
+            // Validate Annual Income (Only numbers)
+            let incomeInput = document.getElementById("annual_income").value;
+            let incomeError = document.getElementById("income-error");
+            if (!/^\d+$/.test(incomeInput)) {
+                incomeError.textContent = "Annual Income must contain only numbers.";
+                isValid = false;
+            } else {
+                incomeError.textContent = "";
+            }
+
+            // If all fields are valid, show success message
+            if (isValid) {
+                document.getElementById("bank-success-message").style.display = "block";
+            }
+        });
+
+        // Prevent non-numeric input in Account Number & Annual Income fields
+        document.getElementById("account_number").addEventListener("keypress", function (event) {
+            if (!/[0-9]/.test(event.key)) {
+                event.preventDefault();
+                document.getElementById("account-error").textContent = "Only numbers are allowed.";
+            } else {
+                document.getElementById("account-error").textContent = "";
+            }
+        });
+
+        document.getElementById("annual_income").addEventListener("keypress", function (event) {
+            if (!/[0-9]/.test(event.key)) {
+                event.preventDefault();
+                document.getElementById("income-error").textContent = "Only numbers are allowed.";
+            } else {
+                document.getElementById("income-error").textContent = "";
+            }
+        });
+
+        document.getElementById("save-btn").addEventListener("click", function () {
+            window.parent.postMessage("sectionSaved", "*");
+        });
+    </script>
+</body>
+</html>

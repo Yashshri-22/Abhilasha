@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employment Questions</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f4f7f9;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 85%;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            background: white;
+            position: relative;
+            border-top: 6px solid #4CAF50;
+        }
+
+        form label {
+            display: block;
+            margin-top: 15px;
+            text-align: left;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            text-align: left;
+            margin-top: 5px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px;
+            width: 100%;
+            background: #e67e22;
+            color: white;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s ease-in-out;
+        }
+
+        button:hover {
+            background: #ff7700;
+        }
+
+        .message {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form id="employment-form">
+            <label>Are you employed?
+                <select id="employment_status" name="employment_status" required>
+                    <option value="">Select</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </label>
+            <div class="error" id="employment-error"></div>
+
+            <label>Current Occupation: 
+                <input type="text" id="occupation" name="occupation" placeholder="Enter your occupation" disabled required>
+                <div class="error" id="occupation-error"></div>
+            </label>
+
+            <button id="save-btn" type="submit">Submit</button>
+        </form>
+        <div class="message" id="employment-success-message">Employment details submitted successfully.</div>
+    </div>
+
+    <script>
+        document.getElementById("employment-form").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            document.getElementById("employment-success-message").style.display = "none";
+
+            let isValid = true;
+
+            // Validate employment status
+            let employmentStatus = document.getElementById("employment_status").value;
+            let employmentError = document.getElementById("employment-error");
+
+            if (employmentStatus === "") {
+                employmentError.textContent = "Please select your employment status.";
+                isValid = false;
+            } else {
+                employmentError.textContent = "";
+            }
+
+            // Validate occupation only if employed
+            let occupationInput = document.getElementById("occupation").value.trim();
+            let occupationError = document.getElementById("occupation-error");
+
+            if (employmentStatus === "yes" && occupationInput === "") {
+                occupationError.textContent = "Please enter your occupation.";
+                isValid = false;
+            } else {
+                occupationError.textContent = "";
+            }
+
+            if (isValid) {
+                document.getElementById("employment-success-message").style.display = "block";
+            }
+        });
+
+        // Enable/disable occupation field based on employment status
+        document.getElementById("employment_status").addEventListener("change", function () {
+            let occupationField = document.getElementById("occupation");
+
+            if (this.value === "yes") {
+                occupationField.disabled = false;
+            } else {
+                occupationField.disabled = true;
+                occupationField.value = "";
+            }
+        });
+        document.getElementById("save-btn").addEventListener("click", function () {
+            window.parent.postMessage("sectionSaved", "*");
+        });
+    </script>
+</body>
+</html>

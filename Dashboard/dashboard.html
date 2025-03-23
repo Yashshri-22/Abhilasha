@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+<!-- Sidebar Navigation -->
+<div class="sidebar">
+    <h2>Dashboard</h2>
+    <ul>
+        <li onclick="loadPage('pages/home/home.html')">
+            <img src="../Assets/Home.png" alt="Home Icon"> Home
+        </li>
+        <li onclick="loadPage('pages/profile/profile.html')">
+            <img src="../Assets/profile.png" alt="Profile Icon"> Profile
+        </li>
+        <li onclick="loadPage('pages/schemes/schemes.html')">
+            <img src="../Assets/schemes.png" alt="Schemes Icon"> Schemes
+        </li>
+        <li onclick="loadPage('pages/appliedSchemes/appliedSchemes.html')">
+            <img src="../Assets/applied.png" alt="Applied Schemes Icon"> My Applied Schemes
+        </li>
+        <li onclick="loadPage('pages/cancelledSchemes/cancelledSchemes.html')">
+            <img src="../Assets/Cancel.png" alt="Cancelled Schemes Icon"> My Cancelled Schemes
+        </li>
+        <li onclick="loadPage('pages/Logout/Logout.html')">
+            <img src="../Assets/Logout.png" alt="Logout"> Logout
+        </li>
+    </ul>    
+</div>
+
+<!-- Main Content -->
+<div class="content" id="mainContent">
+    <iframe id="mainFrame" src="pages/home/home.html" frameborder="0"></iframe>
+</div>
+
+<script src="dashboard.js"></script>
+</body>
+</html>

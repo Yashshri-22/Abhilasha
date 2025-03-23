@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Details</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #F4F4F4;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 90%;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            background: white;
+            position: relative;
+        }
+
+        .upload-text {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            text-align: center;
+            display: block;
+        }
+
+        .profile-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-photo {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            border: 3px solid #053a68;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            cursor: pointer;
+            overflow: hidden;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .profile-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        form label {
+            display: block;
+            text-align: left;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        input,
+        select {
+            width: 95%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: 2px solid #939393;
+            font-size: 16px;
+            margin-bottom: 15px;
+            background: white;
+            /* cursor: pointer; */
+            display: block;
+        }
+
+        select {
+            width: 98%;
+            cursor: pointer;
+        }
+
+        button {
+            background-color: #e67e22;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #ff7700;
+            /* transform: scale(1.05); */
+        }
+
+        .message {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="profile-container">
+            <span class="upload-text">Upload Photo</span>
+            <div class="profile-photo" onclick="document.getElementById('photo-input').click()">
+                <img id="profile-preview" src="placeholder.png">
+            </div>
+        </div>
+        <input type="file" id="photo-input" accept="image/*" style="display: none;" onchange="previewPhoto(event)">
+
+        <form id="personal-form">
+            <label>First Name: <input type="text" name="first_name" placeholder="Enter your first name"
+                    required></label>
+
+            <label>Last Name: <input type="text" name="last_name" placeholder="Enter your last name" required></label>
+
+            <label>Father's/Husband's Name: <input type="text" name="father_husband_name"
+                    placeholder="Enter father's/husband's name" required></label>
+
+            <label>Mother's Name: <input type="text" name="mother_name" placeholder="Enter mother's name"
+                    required></label>
+
+            <label for="gender">Gender:</label>
+            <select id="gender" name="gender" required>
+                <option value="">Select</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label>Address: <input type="text" name="address" placeholder="Enter your address" required></label>
+
+            <label>Pin Code: <input type="text" name="pin_code" placeholder="Enter pin code" required maxlength="6"
+                    pattern="[0-9]{6}" title="Pin Code must be exactly 6 digits"></label>
+
+            <label>Education: <input type="text" name="education" placeholder="Enter your highest qualification"
+                    required></label>
+
+            <label>Aadhar Number: <input type="text" name="aadhar" placeholder="Enter Aadhar number" maxlength="12"
+                    pattern="[0-9]{12}" title="Aadhar Number must be exactly 12 digits" required></label>
+
+            <label>UDID Card: <input type="text" name="udid" placeholder="Enter UDID card number" maxlength="18"
+                    required></label>
+
+            <label>Phone Number: <input type="text" name="phone" placeholder="Enter phone number" maxlength="10"
+                    pattern="[0-9]{10}" title="Phone number must be exactly 10 digits" required></label>
+
+            <label>Alternate Phone Number: <input type="text" name="alt_phone"
+                    placeholder="Enter alternate phone number" maxlength="10" pattern="[0-9]{10}"
+                    title="Phone number must be exactly 10 digits"></label>
+
+            <label>Date of Birth: <input type="date" name="dob" required></label>
+
+            <label for="marital_status">Marital Status:</label>
+            <select id="marital_status" name="marital_status" required>
+                <option value="">Select</option>
+                <option value="Single">Single</option>
+                <option value="Married">Married</option>
+            </select>
+
+            <button id="save-btn" type="submit">Save</button>
+            
+        </form>
+        <div class="message" id="success-message">Thank you! Your details have been submitted successfully.</div>
+    </div>
+    <script>
+        function previewPhoto(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('profile-preview').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        document.getElementById("save-btn").addEventListener("click", function () {
+            window.parent.postMessage("sectionSaved", "*");
+        });
+
+
+        document.querySelectorAll("input[type='text']").forEach(input => {
+            input.addEventListener("input", function () {
+                if (this.name === "pin_code" || this.name === "aadhar" || this.name === "phone" || this.name === "alt_phone") {
+                    this.value = this.value.replace(/\D/g, ''); // Allow only numeric input
+                }
+            });
+        });
+
+    </script>
+
+</body>
+
+</html>

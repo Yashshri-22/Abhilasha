@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Applied Schemes</title>
+    <link rel="stylesheet" href="appliedSchemes.css">
+</head>
+<body>
+    <div class="container">
+        <h2>My Applied Schemes</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th class="view">#</th>
+                    <th>Scheme Name</th>
+                    <th>Description</th>
+                    <th class="view">Status</th>
+                </tr>
+            </thead>
+            <tbody id="appliedSchemesTable">
+                <!-- Applied schemes will be added dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Status Dialog -->
+    <div id="statusDialog" class="dialog">
+        <div class="dialog-content">
+            <span class="close-btn" onclick="closeDialog()">&times;</span>
+            <h3>Status Details</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Remark</th>
+                        <th>Sent By</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="statusTable">
+                    <!-- Remarks will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="appliedSchemes.js"></script>
+</body>
+</html>

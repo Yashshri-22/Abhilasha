@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Divyang Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7f9;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 90%;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            background: white;
+            position: relative;
+        }
+
+        form label {
+            display: block;
+            margin-top: 15px;
+            text-align: left;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input,
+        select {
+            width: 95%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 2px solid #939393;
+            font-size: 16px;
+        }
+
+        select {
+            width: 98%; 
+        }
+
+        button {
+            background-color: #e67e22;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+            display: block;
+            margin: 20px auto;
+        }
+
+        button:hover {
+            background: #ff7700;
+        }
+
+        .message {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <form id="divyang-form">
+            <label>Divyang Type:
+                <select name="divyang_type" required>
+                    <option value="">Select Disability Type</option>
+                    <option value="Blindness">Blindness</option>
+                    <option value="Low-vision">Low-vision</option>
+                    <option value="Leprosy Cured Persons">Leprosy Cured Persons</option>
+                    <option value="Hearing Impairment">Hearing Impairment</option>
+                    <option value="Locomotor Disability">Locomotor Disability</option>
+                    <option value="Dwarfism">Dwarfism</option>
+                    <option value="Intellectual Disability">Intellectual Disability</option>
+                    <option value="Mental Illness">Mental Illness</option>
+                    <option value="Autism Spectrum Disorder">Autism Spectrum Disorder</option>
+                    <option value="Cerebral Palsy">Cerebral Palsy</option>
+                    <option value="Muscular Dystrophy">Muscular Dystrophy</option>
+                    <option value="Chronic Neurological Conditions">Chronic Neurological Conditions</option>
+                    <option value="Specific Learning Disabilities">Specific Learning Disabilities</option>
+                    <option value="Multiple Sclerosis">Multiple Sclerosis</option>
+                    <option value="Speech and Language Disability">Speech and Language Disability</option>
+                    <option value="Thalassemia">Thalassemia</option>
+                    <option value="Hemophilia">Hemophilia</option>
+                    <option value="Sickle Cell Disease">Sickle Cell Disease</option>
+                    <option value="Multiple Disabilities">Multiple Disabilities</option>
+                    <option value="Acid Attack Victim">Acid Attack Victim</option>
+                    <option value="Parkinson's Disease">Parkinson's Disease</option>
+                </select>
+            </label>
+
+            <label>Percentage of Disability:
+                <input type="number" id="disability_percentage" name="disability_percentage"
+                    placeholder="Enter Percentage" required min="0" max="100">
+            </label>
+
+            <label>Certificate Number:
+                <input type="text" id="certificate_number" name="certificate_number"
+                    placeholder="Enter Certificate Number" required maxlength="18" minlength="18">
+            </label>
+
+            <label>Annual Income:
+                <input type="text" id="annual_income" name="annual_income" placeholder="Enter Annual Income" required>
+            </label>
+
+            <button id="save-btn" type="submit">Save</button>
+        </form>
+        <div class="message" id="divyang-success-message">Divyang details submitted successfully.</div>
+    </div>
+
+    <script>
+        document.getElementById("divyang-form").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            // Validate Percentage of Disability
+            const disabilityPercentage = document.getElementById("disability_percentage").value;
+            if (disabilityPercentage < 0 || disabilityPercentage > 100) {
+                alert("Percentage of Disability must be between 0 and 100.");
+                return;
+            }
+
+            // Validate Certificate Number (exactly 18 alphanumeric characters)
+            const certificateNumber = document.getElementById("certificate_number").value;
+            if (!/^[a-zA-Z0-9]{18}$/.test(certificateNumber)) {
+                alert("Certificate Number must be exactly 18 alphanumeric characters.");
+                return;
+            }
+
+            // Validate Annual Income (only numbers)
+            const annualIncome = document.getElementById("annual_income").value;
+            if (!/^\d+$/.test(annualIncome)) {
+                alert("Annual Income must contain only numbers.");
+                return;
+            }
+
+            document.getElementById("divyang-success-message").style.display = "block";
+        });
+
+        // Prevent non-numeric input in Annual Income field
+        document.getElementById("annual_income").addEventListener("input", function (event) {
+            this.value = this.value.replace(/\D/g, '');
+        });
+
+        // Prevent non-alphanumeric input in Certificate Number field
+        document.getElementById("certificate_number").addEventListener("input", function (event) {
+            this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 18);
+        });
+
+        // Ensure Disability Percentage is within range
+        document.getElementById("disability_percentage").addEventListener("input", function () {
+            if (this.value > 100) {
+                this.value = 100;
+            } else if (this.value < 0) {
+                this.value = 0;
+            }
+        });
+
+        document.getElementById("save-btn").addEventListener("click", function () {
+            window.parent.postMessage("sectionSaved", "*");
+        });
+    </script>
+</body>
+
+</html>

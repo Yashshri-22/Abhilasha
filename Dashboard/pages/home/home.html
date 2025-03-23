@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="home.css">
+</head>
+
+<body>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="hero-overlay">
+            <h1>Welcome to Your Dashboard</h1>
+        </div>
+    </div>
+
+    <!-- Cards Section -->
+    <div class="cards-container">
+        <div class="card" onclick="navigateTo('profile')">
+            <img src="../../../Assets//blue_icons/profile.png" alt="Profile">
+            <h3>Profile</h3>
+        </div>
+        <div class="card" onclick="navigateTo('schemes')">
+            <img src="../../../Assets//blue_icons/scheme.png" alt="Schemes">
+            <h3>Schemes</h3>
+        </div>
+        <div class="card" onclick="navigateTo('appliedSchemes')">
+            <img src="../../../Assets//blue_icons/applied.png" alt="Applied Schemes">
+            <h3>Applied Schemes</h3>
+        </div>
+        <div class="card" onclick="navigateTo('cancelledSchemes')">
+            <img src="../../../Assets//blue_icons/Cancel.png" alt="Cancelled Schemes">
+            <h3>Cancelled Schemes</h3>
+        </div>
+    </div>
+
+    <!-- Steps Section -->
+    <div class="instructions">
+        <h2>How to Use</h2>
+        <ol>
+            <li>Click on the <strong>Profile</strong> card to update or view your details.</li>
+            <li>Explore available <strong>Schemes</strong> and check your eligibility.</li>
+            <li>View the schemes you have <strong>applied</strong> for under "Applied Schemes".</li>
+            <li>If you cancel any scheme, check the details in "Cancelled Schemes".</li>
+        </ol>
+    </div>
+
+
+
+    <script>
+        function navigateTo(page) {
+            window.location.href = `../${page}/${page}.html`;
+        }
+    </script>
+
+</body>
+
+</html>
