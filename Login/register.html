@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Abhilasha-Divyang Scholarship Portal</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="wrapper">
         <!-- Left Side with Background Image -->
@@ -15,21 +17,15 @@
         <div class="right-side">
             <div class="register-box">
                 <h2>New User Registration</h2>
-                <form id="register-form" autocomplete="off">
-                    <input type="text" class="field" id="full-name" placeholder="Enter Full Name" required>
+                <form id="register-section" autocomplete="off">
+                    <!-- <input type="text" class="field" id="full-name" placeholder="Enter Full Name" required> -->
 
                     <input type="email" class="field" id="email" placeholder="Enter Email" required>
-
-                    <input type="text" class="field" id="phone" placeholder="Enter 10-digit Phone Number" required>
-                    <small class="error-message" id="phone-error"></small>
-
                     <input type="password" class="field" id="password" placeholder="Enter Password" required>
-                    <small class="error-message" id="password-error"></small>
-
                     <input type="password" class="field" id="confirm-password" placeholder="Confirm Password" required>
-                    <small class="error-message" id="confirm-password-error"></small>
 
-                    <button type="submit" class="btn">Register</button>
+                    <p class="error-message" id="form-error"></p>
+                    <button type="submit" id="registerButton" class="btn">Register</button>
                 </form>
 
                 <div class="extra-options">
@@ -39,6 +35,7 @@
         </div>
     </div>
 
-    <script src="register.js"></script>
+    <script src="register.js" type="module"></script>
 </body>
+
 </html>

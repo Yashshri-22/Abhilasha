@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Abhilasha-Divyang Scholarship Portal - Login</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="wrapper">
         <!-- Left Side with Background Image -->
@@ -17,10 +19,10 @@
                 <h2>Abhilasha-Divyang Scholarship Portal</h2>
                 <p class="tagline">Empowering the Future for Disabled Students</p>
 
-                <form id="login-form" autocomplete="off">
-                    <input type="text" id="username" placeholder="Enter Username" required>
-                    <input type="password" id="password" placeholder="Enter Password" required>
-                    <button type="submit" class="btn">Login</button>
+                <form id="login-form">
+                    <input type="email" class="field" id="email" placeholder="Enter Email" required>
+                    <input type="password" class="field" id="password" placeholder="Enter Password" required>
+                    <button type="submit" id="loginButton" class="btn">Login</button>
                 </form>
 
                 <div class="register-section">
@@ -39,6 +41,9 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="login.js" type="module">
+
+    </script>
 </body>
+
 </html>
