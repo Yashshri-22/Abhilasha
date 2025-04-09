@@ -14,7 +14,7 @@
         }
 
         .container {
-            width: 90%;
+            width: 95%;
             max-width: 1200px;
             margin: 50px auto;
             padding: 20px;
@@ -143,6 +143,7 @@
             // If all fields are valid, show success message
             if (isValid) {
                 document.getElementById("bank-success-message").style.display = "block";
+                window.parent.postMessage({ section: "bank", data: { bank_name: document.querySelector('input[name="bank_name"]').value } }, "*");
             }
         });
 

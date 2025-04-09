@@ -15,7 +15,7 @@
         }
 
         .container {
-            width: 90%;
+            width: 95%;
             margin: 50px auto;
             padding: 20px;
             border-radius: 10px;
@@ -150,6 +150,7 @@
             }
 
             document.getElementById("divyang-success-message").style.display = "block";
+            window.parent.postMessage({ section: "divyang", data: { divyang_type: document.querySelector('select[name="divyang_type"]').value } }, "*");
         });
 
         // Prevent non-numeric input in Annual Income field

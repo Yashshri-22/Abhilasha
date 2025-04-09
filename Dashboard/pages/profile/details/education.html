@@ -16,7 +16,7 @@
         }
 
         .container {
-            width: 90%;
+            width: 95%;
             max-width: 90%;
             margin: 50px auto;
             padding: 20px;
@@ -170,7 +170,7 @@
             <div class="mb-3">
                 <input type="checkbox" id="secondaryCheckbox"
                     onclick="toggleSection('secondaryCheckbox', 'secondarySection')">
-                <label class="form-label">Secondary (11 & 12)</label>
+                <label class="form-label">Secondary (11 & 12/Diploma)</label>
                 <div id="secondarySection" class="education-section">
                     <label class="form-label">Institute Name</label>
                     <input type="text" class="form-control" placeholder="Institute Name">
@@ -243,8 +243,35 @@
 
 <script>
     document.getElementById("save-btn").addEventListener("click", function () {
-            window.parent.postMessage("sectionSaved", "*");
-        });
+        const educationData = {
+            primary: {
+                institute: document.querySelector("#primarySection input[type='text']").value,
+                board: document.getElementById("primaryBoard").value,
+                marks: document.getElementById("primaryMarks").value,
+                year: document.getElementById("primaryYear").value
+            },
+            secondary: {
+                institute: document.querySelector("#secondarySection input[type='text']").value,
+                board: document.getElementById("secondaryBoard").value,
+                marks: document.getElementById("secondaryMarks").value,
+                year: document.getElementById("secondaryYear").value
+            },
+            graduate: {
+                institute: document.querySelector("#graduateSection input[type='text']").value,
+                course: document.getElementById("graduateCourse").value,
+                cgpa: document.getElementById("graduateCGPA").value,
+                year: document.getElementById("graduateYear").value
+            },
+            postGraduate: {
+                institute: document.querySelector("#postGraduateSection input[type='text']").value,
+                cgpa: document.getElementById("postGraduateCGPA").value,
+                year: document.getElementById("postGraduateYear").value
+            }
+        };
+
+        // Notify parent window that the education section is complete
+        window.parent.postMessage({ section: "education", data: educationData }, "*");
+    });
 </script>
 
 </html>

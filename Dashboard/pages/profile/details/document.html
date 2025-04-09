@@ -14,7 +14,7 @@
         }
 
         .container {
-            width: 85%;
+            width: 95%;
             max-width: 800px;
             background: white;
             padding: 20px;
@@ -148,8 +148,22 @@
     }
 
     document.getElementById("save-btn").addEventListener("click", function () {
-            window.parent.postMessage("sectionSaved", "*");
-        });
+        const documentData = {
+            disabilityCertificate: document.getElementById("disability-file").files[0]?.name || null,
+            aadhaarCard: document.getElementById("aadhaar-file").files[0]?.name || null
+        };
+
+        if (documentData.disabilityCertificate && documentData.aadhaarCard) {
+            // Notify parent window that the document section is complete
+            window.parent.postMessage({ section: "document", data: documentData }, "*");
+
+            // Update progress bar locally
+            document.getElementById("progress-bar").style.width = "100%";
+            alert("Documents uploaded successfully!");
+        } else {
+            alert("⚠ Please upload all required documents.");
+        }
+    });
 
     function saveDocuments() {
         let disabilityFile = document.getElementById('disability-file').files.length > 0;

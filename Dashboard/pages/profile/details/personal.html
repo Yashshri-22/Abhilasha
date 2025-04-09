@@ -17,7 +17,7 @@
         }
 
         .container {
-            width: 90%;
+            width: 95%;
             margin: 50px auto;
             padding: 20px;
             border-radius: 10px;
@@ -176,7 +176,7 @@
             </select>
 
             <button id="save-btn" type="submit">Save</button>
-            
+
         </form>
         <div class="message" id="success-message">Thank you! Your details have been submitted successfully.</div>
     </div>
@@ -196,6 +196,13 @@
             window.parent.postMessage("sectionSaved", "*");
         });
 
+        document.getElementById("personal-form").addEventListener("submit", function (event) {
+            event.preventDefault();
+            document.getElementById("success-message").style.display = "block";
+
+            // Notify parent window that the personal section is complete
+            window.parent.postMessage({ section: "personal" }, "*");
+        });
 
         document.querySelectorAll("input[type='text']").forEach(input => {
             input.addEventListener("input", function () {
@@ -206,7 +213,6 @@
         });
 
     </script>
-
 </body>
 
 </html>
