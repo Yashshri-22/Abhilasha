@@ -39,6 +39,7 @@ th, td {
 th {
     background-color: #053a68;
     color: white;
+    white-space: nowrap;
 }
 
 .viewButton, .applyButton {
@@ -49,6 +50,7 @@ th {
     cursor: pointer;
     font-size: 14px;
     border-radius: 5px;
+    white-space: nowrap;
 }
 
 .applyButton {

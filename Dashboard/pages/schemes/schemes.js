@@ -1,15 +1,15 @@
 // Array of schemes
 const schemes = [
-    { id: 1, name: "Education Support", desc: "Financial aid for underprivileged students.", pdf: "education.pdf" },
-    { id: 2, name: "Startup Funding", desc: "Funding assistance for young entrepreneurs.", pdf: "startup.pdf" },
-    { id: 3, name: "Health Insurance", desc: "Free healthcare coverage for low-income families.", pdf: "health.pdf" },
-    { id: 4, name: "Women Empowerment", desc: "Skill development programs for women.", pdf: "women.pdf" },
-    { id: 5, name: "Housing Scheme", desc: "Subsidized housing for economically weaker sections.", pdf: "housing.pdf" },
-    { id: 6, name: "Agricultural Subsidy", desc: "Financial support for farmers.", pdf: "agriculture.pdf" },
-    { id: 7, name: "Skill Development", desc: "Free training programs for job seekers.", pdf: "skills.pdf" },
-    { id: 8, name: "Disability Aid", desc: "Special support for differently-abled individuals.", pdf: "disability.pdf" },
-    { id: 9, name: "Scholarship Scheme", desc: "Merit-based scholarships for students.", pdf: "scholarship.pdf" },
-    { id: 10, name: "Employment Assistance", desc: "Job placement support for unemployed youth.", pdf: "employment.pdf" }
+    { id: 1, name: "Sanjay Gandhi Niradhar Anudan Yojana", desc: "Monthly financial assistance to needy disabled persons.", pdf: "education.pdf" },
+    { id: 2, name: "Swavalamban Yojana (Self-employment Scheme)", desc: "Financial support for self-employment ventures.", pdf: "startup.pdf" },
+    { id: 3, name: "Housing Scheme for Disabled (under PMAY / State Govt)", desc: "Allotment of affordable housing units.", pdf: "health.pdf" },
+    { id: 4, name: "Free Travel Concession Scheme (MSRTC)", desc: "Free or concessional travel for disabled persons in state transport buses.", pdf: "women.pdf" },
+    { id: 5, name: "Scholarship Scheme for Disabled Students", desc: "Financial assistance for school/college-going disabled students.", pdf: "housing.pdf" },
+    { id: 6, name: "Niramaya Health Insurance Scheme", desc: "Health insurance coverage for persons with developmental disabilities.", pdf: "agriculture.pdf" },
+    { id: 7, name: "Skill Development Training Scheme for PWDs", desc: "Free vocational training programs in various trades.", pdf: "skills.pdf" },
+    { id: 8, name: "Assistance for Purchase of Assistive Devices", desc: "Financial support for purchasing prosthetic devices and other assistive aids.", pdf: "disability.pdf" },
+    { id: 9, name: "Free Bus Pass Scheme", desc: "Free or concessional travel for disabled individuals in PMPML buses.​", pdf: "scholarship.pdf" },
+    { id: 10, name: "Financial Assistance for 75% or More Permanent Disability", desc: "One-time financial assistance for workers with significant disabilities.​", pdf: "employment.pdf" }
 ];
 
 // Function to populate table
