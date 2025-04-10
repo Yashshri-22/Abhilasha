@@ -30,6 +30,9 @@ appliedSchemes.forEach((scheme, index) => {
             <td  class="view">
                 <button id="status-btn" onclick="openDialog(${scheme.id})">Check Status</button>
             </td>
+            <td  class="view">
+                <button id="cancel-btn" onclick="cancelScheme(${scheme.id})">Cancel</button>
+            </td>
         </tr>
     `;
     tableBody.innerHTML += row;
