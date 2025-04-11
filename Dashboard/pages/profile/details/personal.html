@@ -5,8 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Details</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkxeSRcylugPQdhABCFmWmTUYFQ868aDE",
+            authDomain: "abhilasha-fdbc0.firebaseapp.com",
+            projectId: "abhilasha-fdbc0",
+            storageBucket: "abhilasha-fdbc0.firebasestorage.app",
+            messagingSenderId: "11075472828",
+            appId: "1:11075472828:web:ed0a46285d259760f32fb9",
+            measurementId: "G-H49EPQK1PQ"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -117,15 +135,17 @@
 
 <body>
     <div class="container">
+
         <div class="profile-container">
             <span class="upload-text">Upload Photo</span>
             <div class="profile-photo" onclick="document.getElementById('photo-input').click()">
-                <img id="profile-preview" src="placeholder.png">
+                <img id="profile-preview" src="../../../../Assets/blue_icons/profile.png" alt="Profile Photo" onerror="this.onerror=null;this.src='../../../../Assets/profile.png';">
             </div>
         </div>
         <input type="file" id="photo-input" accept="image/*" style="display: none;" onchange="previewPhoto(event)">
 
         <form id="personal-form">
+
             <label>First Name: <input type="text" name="first_name" placeholder="Enter your first name"
                     required></label>
 
@@ -176,10 +196,12 @@
             </select>
 
             <button id="save-btn" type="submit">Save</button>
-
         </form>
+
         <div class="message" id="success-message">Thank you! Your details have been submitted successfully.</div>
+
     </div>
+
     <script>
         function previewPhoto(event) {
             const file = event.target.files[0];
@@ -192,27 +214,63 @@
             }
         }
 
-        document.getElementById("save-btn").addEventListener("click", function () {
-            window.parent.postMessage("sectionSaved", "*");
-        });
-
-        document.getElementById("personal-form").addEventListener("submit", function (event) {
-            event.preventDefault();
-            document.getElementById("success-message").style.display = "block";
-
-            // Notify parent window that the personal section is complete
-            window.parent.postMessage({ section: "personal" }, "*");
-        });
-
+        // Restrict numeric-only fields
         document.querySelectorAll("input[type='text']").forEach(input => {
             input.addEventListener("input", function () {
-                if (this.name === "pin_code" || this.name === "aadhar" || this.name === "phone" || this.name === "alt_phone") {
-                    this.value = this.value.replace(/\D/g, ''); // Allow only numeric input
+                if (["pin_code", "aadhar", "phone", "alt_phone"].includes(this.name)) {
+                    this.value = this.value.replace(/\D/g, '');
                 }
             });
         });
 
+        // Populate form with data from Firestore
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                const uid = user.uid;
+                const docRef = db.collection("users").doc(uid);
+                const docSnap = await docRef.get();
+                if (docSnap.exists) {
+                    const data = docSnap.data().personalDetails;
+                    if (data) {
+                        for (let key in data) {
+                            if (document.querySelector(`[name="${key}"]`)) {
+                                document.querySelector(`[name="${key}"]`).value = data[key];
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Handle form submit
+        document.getElementById("personal-form").addEventListener("submit", async function (event) {
+            event.preventDefault();
+            const user = auth.currentUser;
+            if (!user) return alert("User not logged in");
+
+            const formData = {};
+            const formElements = this.elements;
+            for (let element of formElements) {
+                if (element.name) {
+                    formData[element.name] = element.value;
+                }
+            }
+
+            await db.collection("users").doc(user.uid).update({
+                personalDetails: formData
+            });
+
+            document.getElementById("success-message").style.display = "block";
+            window.parent.postMessage({ section: "personal" }, "*");
+        });
+
+        // Notify parent for progress bar
+        document.getElementById("save-btn").addEventListener("click", function () {
+            window.parent.postMessage("sectionSaved", "*");
+        });
     </script>
+
+
 </body>
 
 </html>

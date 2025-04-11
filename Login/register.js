@@ -1,13 +1,19 @@
 import { getAuth, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
+import {
+    getFirestore,
+    doc,
+    setDoc
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
 
 // Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyAkxeSRcylugPQdhABCFmWmTUYFQ868aDE",
     authDomain: "abhilasha-fdbc0.firebaseapp.com",
     projectId: "abhilasha-fdbc0",
-    storageBucket: "abhilasha-fdbca0.firebasestorage.app",
+    storageBucket: "abhilasha-fdbc0.firebasestorage.app",
     messagingSenderId: "11075472828",
     appId: "1:11075472828:web:ed0a46285d259760f32fb9",
     measurementId: "G-H49EPQK1PQ"
@@ -22,6 +28,8 @@ const passwordField = document.getElementById("password");
 const confirmPasswordField = document.getElementById("confirm-password");
 const formError = document.getElementById("form-error");
 const registerButton = document.getElementById("registerButton");
+const db = getFirestore(app);
+
 
 document.addEventListener("DOMContentLoaded", function () {
     const registerForm = document.getElementById("register-section");
@@ -145,12 +153,31 @@ registerButton.addEventListener("click", async (e) => {
 const registerUser = async (email, password) => {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        console.log("User registered:", userCredential.user);
-        return userCredential.user;
+        const user = userCredential.user;
+
+        // Create user doc in Firestore
+        const userDocRef = doc(db, "users", user.uid);
+        await setDoc(userDocRef, {
+            email: user.email,
+            personalDetails: null,
+            bankDetails: null,
+            divyangDetails: null,
+            education: {
+                primary: null,
+                secondary: null,
+                graduate: null,
+                postgraduate: null
+            },
+            questions: null,
+            appliedSchemes: [],
+            cancelledSchemes: []
+        });
+
+        console.log("✅ Firestore user profile created");
+        return user;
     } catch (error) {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error("Error registering user:", errorCode, errorMessage);
+        console.error("Error registering user:", error.code, error.message);
         return null;
     }
 };
+
