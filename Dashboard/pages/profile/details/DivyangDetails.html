@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Divyang Details</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -44,7 +47,7 @@
         }
 
         select {
-            width: 98%; 
+            width: 98%;
         }
 
         button {
@@ -125,57 +128,96 @@
     </div>
 
     <script>
-        document.getElementById("divyang-form").addEventListener("submit", function (event) {
-            event.preventDefault();
+        // Firebase configuration (same as Personal Details)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkxeSRcylugPQdhABCFmWmTUYFQ868aDE",
+            authDomain: "abhilasha-fdbc0.firebaseapp.com",
+            projectId: "abhilasha-fdbc0",
+            storageBucket: "abhilasha-fdbc0.appspot.com",
+            messagingSenderId: "11075472828",
+            appId: "1:11075472828:web:ed0a46285d259760f32fb9",
+            measurementId: "G-H49EPQK1PQ"
+        };
 
-            // Validate Percentage of Disability
-            const disabilityPercentage = document.getElementById("disability_percentage").value;
-            if (disabilityPercentage < 0 || disabilityPercentage > 100) {
-                alert("Percentage of Disability must be between 0 and 100.");
-                return;
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                const userId = user.uid;
+                const userDocRef = db.collection('users').doc(userId);
+
+                // Load existing data on page load
+                userDocRef.get().then(doc => {
+                    if (doc.exists && doc.data().divyangDetails) {
+                        const data = doc.data().divyangDetails;
+                        document.querySelector('select[name="divyang_type"]').value = data.divyang_type || '';
+                        document.getElementById('disability_percentage').value = data.disability_percentage || '';
+                        document.getElementById('certificate_number').value = data.certificate_number || '';
+                        document.getElementById('annual_income').value = data.annual_income || '';
+                    }
+                });
+
+                // Save form data on submit
+                document.getElementById("divyang-form").addEventListener("submit", function (event) {
+                    event.preventDefault();
+
+                    const divyang_type = document.querySelector('select[name="divyang_type"]').value;
+                    const disability_percentage = document.getElementById("disability_percentage").value;
+                    const certificate_number = document.getElementById("certificate_number").value;
+                    const annual_income = document.getElementById("annual_income").value;
+
+                    // Validation
+                    if (disability_percentage < 0 || disability_percentage > 100) {
+                        alert("Percentage of Disability must be between 0 and 100.");
+                        return;
+                    }
+
+                    if (!/^[a-zA-Z0-9]{18}$/.test(certificate_number)) {
+                        alert("Certificate Number must be exactly 18 alphanumeric characters.");
+                        return;
+                    }
+
+                    if (!/^\d+$/.test(annual_income)) {
+                        alert("Annual Income must contain only numbers.");
+                        return;
+                    }
+
+                    // Save to Firestore
+                    userDocRef.set({
+                        divyangDetails: {
+                            divyang_type,
+                            disability_percentage,
+                            certificate_number,
+                            annual_income
+                        }
+                    }, { merge: true }).then(() => {
+                        document.getElementById("divyang-success-message").style.display = "block";
+                        window.parent.postMessage({ section: "divyang", data: { divyang_type } }, "*");
+                        window.parent.postMessage("sectionSaved", "*");
+                    }).catch(error => {
+                        console.error("Error saving data:", error);
+                    });
+                });
+
+                // Input restrictions
+                document.getElementById("annual_income").addEventListener("input", function () {
+                    this.value = this.value.replace(/\D/g, '');
+                });
+
+                document.getElementById("certificate_number").addEventListener("input", function () {
+                    this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 18);
+                });
+
+                document.getElementById("disability_percentage").addEventListener("input", function () {
+                    if (this.value > 100) this.value = 100;
+                    if (this.value < 0) this.value = 0;
+                });
             }
-
-            // Validate Certificate Number (exactly 18 alphanumeric characters)
-            const certificateNumber = document.getElementById("certificate_number").value;
-            if (!/^[a-zA-Z0-9]{18}$/.test(certificateNumber)) {
-                alert("Certificate Number must be exactly 18 alphanumeric characters.");
-                return;
-            }
-
-            // Validate Annual Income (only numbers)
-            const annualIncome = document.getElementById("annual_income").value;
-            if (!/^\d+$/.test(annualIncome)) {
-                alert("Annual Income must contain only numbers.");
-                return;
-            }
-
-            document.getElementById("divyang-success-message").style.display = "block";
-            window.parent.postMessage({ section: "divyang", data: { divyang_type: document.querySelector('select[name="divyang_type"]').value } }, "*");
-        });
-
-        // Prevent non-numeric input in Annual Income field
-        document.getElementById("annual_income").addEventListener("input", function (event) {
-            this.value = this.value.replace(/\D/g, '');
-        });
-
-        // Prevent non-alphanumeric input in Certificate Number field
-        document.getElementById("certificate_number").addEventListener("input", function (event) {
-            this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 18);
-        });
-
-        // Ensure Disability Percentage is within range
-        document.getElementById("disability_percentage").addEventListener("input", function () {
-            if (this.value > 100) {
-                this.value = 100;
-            } else if (this.value < 0) {
-                this.value = 0;
-            }
-        });
-
-        document.getElementById("save-btn").addEventListener("click", function () {
-            window.parent.postMessage("sectionSaved", "*");
         });
     </script>
+
 </body>
 
 </html>
