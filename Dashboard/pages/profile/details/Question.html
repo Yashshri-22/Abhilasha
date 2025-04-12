@@ -1,164 +1,208 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employment Questions</title>
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #f4f7f9;
-            text-align: center;
-            font-size: 16px;
-            font-weight: bold;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Employment Questions</title>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f4f7f9;
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+    }
 
-        .container {
-            width: 95%;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            background: white;
-            position: relative;
-        }
+    .container {
+      width: 95%;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      background: white;
+      position: relative;
+    }
 
-        form label {
-            display: block;
-            margin-top: 15px;
-            text-align: left;
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-        }
+    form label {
+      display: block;
+      margin-top: 15px;
+      text-align: left;
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+    }
 
-        select, input {
-            width: 98%;
-            padding: 10px;
-            margin-top: 5px;
-            color: #333;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 16px;
-        }
+    select, input {
+      width: 98%;
+      padding: 10px;
+      margin-top: 5px;
+      color: #333;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
 
-        #occupation {
-            width: 95%;
-            padding: 10px;
-            margin-top: 5px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 16px;
-        }
+    #occupation {
+      width: 95%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
 
-        .error {
-            color: red;
-            font-size: 14px;
-            text-align: left;
-            margin-top: 5px;
-        }
+    .error {
+      color: red;
+      font-size: 14px;
+      text-align: left;
+      margin-top: 5px;
+    }
 
-        button {
-            margin-top: 20px;
-            padding: 12px;
-            width: 100%;
-            background: #e67e22;
-            color: white;
-            font-size: 14px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: background 0.3s ease-in-out;
-        }
+    button {
+      margin-top: 20px;
+      padding: 12px;
+      width: 100%;
+      background: #e67e22;
+      color: white;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background 0.3s ease-in-out;
+    }
 
-        button:hover {
-            background: #ff7700;
-        }
+    button:hover {
+      background: #ff7700;
+    }
 
-        .message {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 5px;
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-    </style>
+    .message {
+      display: none;
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 5px;
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <form id="employment-form">
-            <label>Are you employed?
-                <select id="employment_status" name="employment_status" required>
-                    <option value="">Select</option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
-                </select>
-            </label>
-            <div class="error" id="employment-error"></div>
+  <div class="container">
+    <form id="employment-form">
+      <label>Are you employed?
+        <select id="employment_status" name="employment_status" required>
+          <option value="">Select</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </label>
+      <div class="error" id="employment-error"></div>
 
-            <label>Current Occupation: 
-                <input type="text" id="occupation" name="occupation" placeholder="Enter your occupation" disabled required>
-                <div class="error" id="occupation-error"></div>
-            </label>
+      <label>Current Occupation:
+        <input type="text" id="occupation" name="occupation" placeholder="Enter your occupation" disabled required>
+        <div class="error" id="occupation-error"></div>
+      </label>
 
-            <button id="save-btn" type="submit">Submit</button>
-        </form>
-        <div class="message" id="employment-success-message">Employment details submitted successfully.</div>
-    </div>
+      <button id="save-btn" type="submit">Submit</button>
+    </form>
+    <div class="message" id="employment-success-message">Employment details submitted successfully.</div>
+  </div>
 
-    <script>
-        document.getElementById("employment-form").addEventListener("submit", function (event) {
-            event.preventDefault();
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAkxeSRcylugPQdhABCFmWmTUYFQ868aDE",
+      authDomain: "abhilasha-fdbc0.firebaseapp.com",
+      projectId: "abhilasha-fdbc0",
+      storageBucket: "abhilasha-fdbc0.appspot.com",
+      messagingSenderId: "11075472828",
+      appId: "1:11075472828:web:ed0a46285d259760f32fb9",
+      measurementId: "G-H49EPQK1PQ"
+    };
 
-            document.getElementById("employment-success-message").style.display = "none";
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-            let isValid = true;
+    // Enable/disable occupation input
+    document.getElementById("employment_status").addEventListener("change", function () {
+      const occupationField = document.getElementById("occupation");
+      if (this.value === "yes") {
+        occupationField.disabled = false;
+      } else {
+        occupationField.disabled = true;
+        occupationField.value = "";
+      }
+    });
 
-            // Validate employment status
-            let employmentStatus = document.getElementById("employment_status").value;
-            let employmentError = document.getElementById("employment-error");
+    // Load data from Firestore
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        const uid = user.uid;
+        const docRef = db.collection("users").doc(uid);
+        const docSnap = await docRef.get();
+        if (docSnap.exists) {
+          const data = docSnap.data().employmentDetails;
+          if (data) {
+            document.getElementById("employment_status").value = data.employment_status || "";
+            document.getElementById("occupation").value = data.occupation || "";
+            document.getElementById("occupation").disabled = data.employment_status !== "yes";
+          }
+        }
+      }
+    });
 
-            if (employmentStatus === "") {
-                employmentError.textContent = "Please select your employment status.";
-                isValid = false;
-            } else {
-                employmentError.textContent = "";
+    // Form submission
+    document.getElementById("employment-form").addEventListener("submit", async function (event) {
+      event.preventDefault();
+      document.getElementById("employment-success-message").style.display = "none";
+
+      let isValid = true;
+      const employmentStatus = document.getElementById("employment_status").value;
+      const occupation = document.getElementById("occupation").value.trim();
+      const employmentError = document.getElementById("employment-error");
+      const occupationError = document.getElementById("occupation-error");
+
+      if (employmentStatus === "") {
+        employmentError.textContent = "Please select your employment status.";
+        isValid = false;
+      } else {
+        employmentError.textContent = "";
+      }
+
+      if (employmentStatus === "yes" && occupation === "") {
+        occupationError.textContent = "Please enter your occupation.";
+        isValid = false;
+      } else {
+        occupationError.textContent = "";
+      }
+
+      if (isValid) {
+        const user = auth.currentUser;
+        if (user) {
+          await db.collection("users").doc(user.uid).set({
+            employmentDetails: {
+              employment_status: employmentStatus,
+              occupation: occupation
             }
+          }, { merge: true });
 
-            // Validate occupation only if employed
-            let occupationInput = document.getElementById("occupation").value.trim();
-            let occupationError = document.getElementById("occupation-error");
+          document.getElementById("employment-success-message").style.display = "block";
 
-            if (employmentStatus === "yes" && occupationInput === "") {
-                occupationError.textContent = "Please enter your occupation.";
-                isValid = false;
-            } else {
-                occupationError.textContent = "";
-            }
+          // Send message to parent
+          window.parent.postMessage({ section: "question", data: { employment_status: employmentStatus } }, "*");
+        }
+      }
+    });
 
-            if (isValid) {
-                document.getElementById("employment-success-message").style.display = "block";
-                window.parent.postMessage({ section: "question", data: { employment_status: document.getElementById("employment_status").value } }, "*");
-            }
-        });
-
-        // Enable/disable occupation field based on employment status
-        document.getElementById("employment_status").addEventListener("change", function () {
-            let occupationField = document.getElementById("occupation");
-
-            if (this.value === "yes") {
-                occupationField.disabled = false;
-            } else {
-                occupationField.disabled = true;
-                occupationField.value = "";
-            }
-        });
-        document.getElementById("save-btn").addEventListener("click", function () {
-            window.parent.postMessage("sectionSaved", "*");
-        });
-    </script>
+    // Let parent iframe know section is saved
+    document.getElementById("save-btn").addEventListener("click", function () {
+      window.parent.postMessage("sectionSaved", "*");
+    });
+  </script>
 </body>
 </html>
