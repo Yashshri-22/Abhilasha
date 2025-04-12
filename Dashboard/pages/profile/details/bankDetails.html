@@ -1,9 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bank Details</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -74,24 +80,25 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <form id="bank-form">
-            <label>Bank Name: 
+            <label>Bank Name:
                 <input type="text" name="bank_name" placeholder="Enter Bank Name" required>
             </label>
 
-            <label>IFSC Code: 
-                <input type="text" id="ifsc_code" name="ifsc_code" placeholder="Enter IFSC Code" required>
+            <label>IFSC Code:
+                <input type="text" id="ifsc_code" name="ifsc_code" placeholder="Enter IFSC Code" required maxlength="11">
                 <div class="error" id="ifsc-error"></div>
             </label>
 
-            <label>Account Number: 
+            <label>Account Number:
                 <input type="text" id="account_number" name="account_number" placeholder="Enter Account Number" required>
                 <div class="error" id="account-error"></div>
             </label>
 
-            <label>Annual Income: 
+            <label>Annual Income:
                 <input type="text" id="annual_income" name="annual_income" placeholder="Enter Annual Income" required>
                 <div class="error" id="income-error"></div>
             </label>
@@ -102,73 +109,105 @@
     </div>
 
     <script>
-        document.getElementById("bank-form").addEventListener("submit", function (event) {
-            event.preventDefault();
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkxeSRcylugPQdhABCFmWmTUYFQ868aDE",
+            authDomain: "abhilasha-fdbc0.firebaseapp.com",
+            projectId: "abhilasha-fdbc0",
+            storageBucket: "abhilasha-fdbc0.appspot.com",
+            messagingSenderId: "11075472828",
+            appId: "1:11075472828:web:ed0a46285d259760f32fb9",
+            measurementId: "G-H49EPQK1PQ"
+        };
 
-            // Hide success message initially
-            document.getElementById("bank-success-message").style.display = "none";
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
 
-            let isValid = true;
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                const uid = user.uid;
+                const userDocRef = db.collection('users').doc(uid);
 
-            // Validate IFSC Code (Must be exactly 11 alphanumeric characters)
-            let ifscInput = document.getElementById("ifsc_code").value;
-            let ifscError = document.getElementById("ifsc-error");
-            if (!/^[A-Za-z0-9]{11}$/.test(ifscInput)) {
-                ifscError.textContent = "IFSC Code must be exactly 11 alphanumeric characters.";
-                isValid = false;
-            } else {
-                ifscError.textContent = "";
+                // Load bank data
+                userDocRef.get().then(doc => {
+                    if (doc.exists && doc.data().bankDetails) {
+                        const data = doc.data().bankDetails;
+                        document.querySelector('input[name="bank_name"]').value = data.bank_name || '';
+                        document.getElementById('ifsc_code').value = data.ifsc_code || '';
+                        document.getElementById('account_number').value = data.account_number || '';
+                        document.getElementById('annual_income').value = data.annual_income || '';
+                    }
+                });
+
+                // Form submit handler
+                document.getElementById("bank-form").addEventListener("submit", function (e) {
+                    e.preventDefault();
+
+                    const bank_name = document.querySelector('input[name="bank_name"]').value.trim();
+                    const ifsc_code = document.getElementById('ifsc_code').value.trim().toUpperCase();
+                    const account_number = document.getElementById('account_number').value.trim();
+                    const annual_income = document.getElementById('annual_income').value.trim();
+
+                    let isValid = true;
+
+                    // Reset error messages
+                    document.getElementById("ifsc-error").textContent = "";
+                    document.getElementById("account-error").textContent = "";
+                    document.getElementById("income-error").textContent = "";
+
+                    // IFSC validation
+                    if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc_code)) {
+                        document.getElementById("ifsc-error").textContent = "Invalid IFSC Code (Format: XXXX0YYYYYY)";
+                        isValid = false;
+                    }
+
+                    // Account number validation (8–18 digits)
+                    if (!/^\d{8,18}$/.test(account_number)) {
+                        document.getElementById("account-error").textContent = "Account number must be 8–18 digits.";
+                        isValid = false;
+                    }
+
+                    // Annual income validation (only numbers)
+                    if (!/^\d+$/.test(annual_income)) {
+                        document.getElementById("income-error").textContent = "Income must contain only digits.";
+                        isValid = false;
+                    }
+
+                    if (!isValid) return;
+
+                    // Save to Firestore
+                    userDocRef.set({
+                        bankDetails: {
+                            bank_name,
+                            ifsc_code,
+                            account_number,
+                            annual_income
+                        }
+                    }, { merge: true }).then(() => {
+                        document.getElementById("bank-success-message").style.display = "block";
+                        window.parent.postMessage({ section: "bank", data: { bank_name } }, "*");
+                        window.parent.postMessage("sectionSaved", "*");
+                    }).catch((error) => {
+                        console.error("Error saving bank details:", error);
+                    });
+                });
+
+                // Restrict input to digits only for income and account
+                document.getElementById("annual_income").addEventListener("input", function () {
+                    this.value = this.value.replace(/\D/g, '');
+                });
+
+                document.getElementById("account_number").addEventListener("input", function () {
+                    this.value = this.value.replace(/\D/g, '');
+                });
+
+                document.getElementById("ifsc_code").addEventListener("input", function () {
+                    this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 11);
+                });
             }
-
-            // Validate Account Number (Only numbers, max 17 digits)
-            let accountInput = document.getElementById("account_number").value;
-            let accountError = document.getElementById("account-error");
-            if (!/^\d{1,17}$/.test(accountInput)) {
-                accountError.textContent = "Account Number must contain only numbers (Max 17 digits).";
-                isValid = false;
-            } else {
-                accountError.textContent = "";
-            }
-
-            // Validate Annual Income (Only numbers)
-            let incomeInput = document.getElementById("annual_income").value;
-            let incomeError = document.getElementById("income-error");
-            if (!/^\d+$/.test(incomeInput)) {
-                incomeError.textContent = "Annual Income must contain only numbers.";
-                isValid = false;
-            } else {
-                incomeError.textContent = "";
-            }
-
-            // If all fields are valid, show success message
-            if (isValid) {
-                document.getElementById("bank-success-message").style.display = "block";
-                window.parent.postMessage({ section: "bank", data: { bank_name: document.querySelector('input[name="bank_name"]').value } }, "*");
-            }
-        });
-
-        // Prevent non-numeric input in Account Number & Annual Income fields
-        document.getElementById("account_number").addEventListener("keypress", function (event) {
-            if (!/[0-9]/.test(event.key)) {
-                event.preventDefault();
-                document.getElementById("account-error").textContent = "Only numbers are allowed.";
-            } else {
-                document.getElementById("account-error").textContent = "";
-            }
-        });
-
-        document.getElementById("annual_income").addEventListener("keypress", function (event) {
-            if (!/[0-9]/.test(event.key)) {
-                event.preventDefault();
-                document.getElementById("income-error").textContent = "Only numbers are allowed.";
-            } else {
-                document.getElementById("income-error").textContent = "";
-            }
-        });
-
-        document.getElementById("save-btn").addEventListener("click", function () {
-            window.parent.postMessage("sectionSaved", "*");
         });
     </script>
 </body>
+
 </html>
