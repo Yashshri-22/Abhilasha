@@ -86,15 +86,57 @@
         }
     </style>
     <script>
+        let isEnforcing = false; // Flag to prevent infinite recursion in enforceDependencies
+
+        // Toggle Education Section visibility
         function toggleEducation() {
             let isLiterate = document.querySelector('input[name="literate"]:checked').value;
             document.getElementById("educationDetails").style.display = (isLiterate === "yes") ? "block" : "none";
         }
 
-        function toggleSection(checkboxId, sectionId) {
-            document.getElementById(sectionId).style.display = document.getElementById(checkboxId).checked ? "block" : "none";
+        // Enforce dependencies between education checkboxes
+        function enforceDependencies() {
+            if (isEnforcing) return; // Prevent recursive calls
+            isEnforcing = true;
+
+            const primaryCheckbox = document.getElementById("primaryCheckbox");
+            const secondaryCheckbox = document.getElementById("secondaryCheckbox");
+            const graduateCheckbox = document.getElementById("graduateCheckbox");
+            const postGraduateCheckbox = document.getElementById("postGraduateCheckbox");
+
+            // Enable/disable checkboxes based on dependencies
+            secondaryCheckbox.disabled = !primaryCheckbox.checked;
+            graduateCheckbox.disabled = !(primaryCheckbox.checked && secondaryCheckbox.checked);
+            postGraduateCheckbox.disabled = !(primaryCheckbox.checked && secondaryCheckbox.checked && graduateCheckbox.checked);
+
+            // Uncheck dependent checkboxes if their parent is unchecked
+            if (!primaryCheckbox.checked) {
+                secondaryCheckbox.checked = false;
+                graduateCheckbox.checked = false;
+                postGraduateCheckbox.checked = false;
+                toggleSection("secondaryCheckbox", "secondarySection");
+                toggleSection("graduateCheckbox", "graduateSection");
+                toggleSection("postGraduateCheckbox", "postGraduateSection");
+            } else if (!secondaryCheckbox.checked) {
+                graduateCheckbox.checked = false;
+                postGraduateCheckbox.checked = false;
+                toggleSection("graduateCheckbox", "graduateSection");
+                toggleSection("postGraduateCheckbox", "postGraduateSection");
+            } else if (!graduateCheckbox.checked) {
+                postGraduateCheckbox.checked = false;
+                toggleSection("postGraduateCheckbox", "postGraduateSection");
+            }
+
+            isEnforcing = false; // Reset the flag after enforcing
         }
 
+        // Toggle section visibility based on checkbox state
+        function toggleSection(checkboxId, sectionId) {
+            document.getElementById(sectionId).style.display = document.getElementById(checkboxId).checked ? "block" : "none";
+            enforceDependencies(); // Call enforceDependencies whenever a checkbox is toggled
+        }
+
+        // Populate year options in a select dropdown
         function populateYears(selectId) {
             let currentYear = new Date().getFullYear();
             let select = document.getElementById(selectId);
@@ -107,6 +149,7 @@
             }
         }
 
+        // Validate marks input field
         function validateMarks(inputId, maxValue) {
             let inputField = document.getElementById(inputId);
             let errorMessage = document.getElementById(inputId + "-error");
@@ -114,35 +157,38 @@
             errorMessage.style.display = (isNaN(value) || value < 0 || value > maxValue) ? "block" : "none";
         }
 
+        // Toggle visibility of "Other" option for boards
         function toggleOtherBoard(selectId, textId) {
             let selectedValue = document.getElementById(selectId).value;
             document.getElementById(textId).style.display = selectedValue === "other" ? "block" : "none";
         }
+
+        // Toggle visibility of "Other" option for graduate courses
         function toggleOtherCourse() {
             let courseSelect = document.getElementById("graduateCourse");
             let otherCourseInput = document.getElementById("otherGraduateCourse");
             otherCourseInput.style.display = (courseSelect.value === "Other") ? "block" : "none";
         }
-        document.addEventListener("DOMContentLoaded", function () {
-            populateYears("primaryYear");
-            populateYears("secondaryYear");
-            populateYears("graduateYear");
-            populateYears("postGraduateYear");
-        });
     </script>
+
 </head>
 
 <body>
     <div class="container">
+
         <div class="mb-3">
             <label class="form-label">Are you literate?</label><br>
             <input type="radio" name="literate" value="yes" onclick="toggleEducation()"> Yes
             <input type="radio" name="literate" value="no" onclick="toggleEducation()"> No
         </div>
+
         <div id="educationDetails" style="display: none;">
+
             <div class="mb-3">
+
                 <input type="checkbox" id="primaryCheckbox"
                     onclick="toggleSection('primaryCheckbox', 'primarySection')">
+
                 <label class="form-label">Primary (1-10)</label>
                 <div id="primarySection" class="education-section">
                     <label class="form-label">Institute Name</label>
@@ -166,7 +212,9 @@
                     <label class="form-label">Passing Year</label>
                     <select id="primaryYear" class="form-control"></select>
                 </div>
+
             </div>
+
             <div class="mb-3">
                 <input type="checkbox" id="secondaryCheckbox"
                     onclick="toggleSection('secondaryCheckbox', 'secondarySection')">
@@ -194,6 +242,7 @@
                     <select id="secondaryYear" class="form-control"></select>
                 </div>
             </div>
+
             <div class="mb-3">
                 <input type="checkbox" id="graduateCheckbox"
                     onclick="toggleSection('graduateCheckbox', 'graduateSection')">
@@ -220,6 +269,7 @@
                     <select id="graduateYear" class="form-control"></select>
                 </div>
             </div>
+
             <div class="mb-3">
                 <input type="checkbox" id="postGraduateCheckbox"
                     onclick="toggleSection('postGraduateCheckbox', 'postGraduateSection')">
@@ -236,42 +286,210 @@
                     <select id="postGraduateYear" class="form-control"></select>
                 </div>
             </div>
+
             <button id="save-btn" type="submit" class="btn">Save</button>
         </div>
     </div>
 </body>
 
-<script>
-    document.getElementById("save-btn").addEventListener("click", function () {
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyAkxeSRcylugPQdhABCFmWmTUYFQ868aDE",
+        authDomain: "abhilasha-fdbc0.firebaseapp.com",
+        projectId: "abhilasha-fdbc0",
+        storageBucket: "abhilasha-fdbc0.firebasestorage.app",
+        messagingSenderId: "11075472828",
+        appId: "1:11075472828:web:ed0a46285d259760f32fb9",
+        measurementId: "G-H49EPQK1PQ"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    async function loadEducationData() {
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const uid = user.uid;
+                const docRef = doc(db, "users", uid);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const educationData = data.education || {}; // Default to empty object if undefined
+                    console.log("Education Data:", educationData);
+
+                    let hasData = false;
+
+                    // Handle Primary Education
+                    if (educationData.primary) {
+                        hasData = true;
+                        document.getElementById("primaryCheckbox").checked = true;
+                        toggleSection("primaryCheckbox", "primarySection");
+                        document.querySelector("#primarySection input[type='text']").value = educationData.primary.institute || "";
+                        document.getElementById("primaryBoard").value = educationData.primary.board || "";
+                        if (educationData.primary.board === "other") {
+                            document.getElementById("primaryBoardOther").value = educationData.primary.boardOther || "";
+                            document.getElementById("primaryBoardOther").style.display = "block";
+                        }
+                        document.getElementById("primaryMarks").value = educationData.primary.marks || "";
+                        document.getElementById("primaryYear").value = educationData.primary.year || "";
+                    }
+
+                    // Handle Secondary Education
+                    if (educationData.secondary) {
+                        hasData = true;
+                        document.getElementById("secondaryCheckbox").checked = true;
+                        toggleSection("secondaryCheckbox", "secondarySection");
+                        document.querySelector("#secondarySection input[type='text']").value = educationData.secondary.institute || "";
+                        document.getElementById("secondaryBoard").value = educationData.secondary.board || "";
+                        if (educationData.secondary.board === "other") {
+                            document.getElementById("secondaryBoardOther").value = educationData.secondary.boardOther || "";
+                            document.getElementById("secondaryBoardOther").style.display = "block";
+                        }
+                        document.getElementById("secondaryMarks").value = educationData.secondary.marks || "";
+                        document.getElementById("secondaryYear").value = educationData.secondary.year || "";
+                    }
+
+                    // Handle Graduate Education
+                    if (educationData.graduate) {
+                        hasData = true;
+                        document.getElementById("graduateCheckbox").checked = true;
+                        toggleSection("graduateCheckbox", "graduateSection");
+                        document.querySelector("#graduateSection input[type='text']").value = educationData.graduate.institute || "";
+                        document.getElementById("graduateCourse").value = educationData.graduate.course || "";
+                        if (educationData.graduate.course === "Other") {
+                            document.getElementById("otherGraduateCourse").value = educationData.graduate.courseOther || "";
+                            document.getElementById("otherGraduateCourse").style.display = "block";
+                        }
+                        document.getElementById("graduateCGPA").value = educationData.graduate.cgpa || "";
+                        document.getElementById("graduateYear").value = educationData.graduate.year || "";
+                    }
+
+                    // Handle Postgraduate Education
+                    if (educationData.postgraduate) {
+                        hasData = true;
+                        document.getElementById("postGraduateCheckbox").checked = true;
+                        toggleSection("postGraduateCheckbox", "postGraduateSection");
+                        document.querySelector("#postGraduateSection input[type='text']").value = educationData.postgraduate.institute || "";
+                        document.getElementById("postGraduateCGPA").value = educationData.postgraduate.cgpa || "";
+                        document.getElementById("postGraduateYear").value = educationData.postgraduate.year || "";
+                    }
+
+                    if (hasData) {
+                        document.querySelector('input[name="literate"][value="yes"]').checked = true;
+                        toggleEducation();
+                    } else {
+                        document.querySelector('input[name="literate"][value="no"]').checked = true;
+                        toggleEducation();
+                    }
+                } else {
+                    document.querySelector('input[name="literate"][value="no"]').checked = true;
+                    toggleEducation();
+                }
+            } else {
+                alert("User not logged in.");
+            }
+        });
+    }
+
+
+    document.getElementById("save-btn").addEventListener("click", async (event) => {
+        event.preventDefault(); // Prevent default form submission
+
+        const user = auth.currentUser;
+        if (!user) {
+            alert("User not logged in.");
+            return;
+        }
+
         const educationData = {
-            primary: {
+            primary: null,
+            secondary: null,
+            graduate: null,
+            postgraduate: null
+        };
+
+        if (document.getElementById("primaryCheckbox").checked) {
+            educationData.primary = {
                 institute: document.querySelector("#primarySection input[type='text']").value,
-                board: document.getElementById("primaryBoard").value,
+                board: document.getElementById("primaryBoard").value === "other"
+                    ? document.getElementById("primaryBoardOther").value
+                    : document.getElementById("primaryBoard").value,
                 marks: document.getElementById("primaryMarks").value,
                 year: document.getElementById("primaryYear").value
-            },
-            secondary: {
+            };
+        }
+
+        if (document.getElementById("secondaryCheckbox").checked) {
+            educationData.secondary = {
                 institute: document.querySelector("#secondarySection input[type='text']").value,
-                board: document.getElementById("secondaryBoard").value,
+                board: document.getElementById("secondaryBoard").value === "other"
+                    ? document.getElementById("secondaryBoardOther").value
+                    : document.getElementById("secondaryBoard").value,
                 marks: document.getElementById("secondaryMarks").value,
                 year: document.getElementById("secondaryYear").value
-            },
-            graduate: {
+            };
+        }
+
+        if (document.getElementById("graduateCheckbox").checked) {
+            educationData.graduate = {
                 institute: document.querySelector("#graduateSection input[type='text']").value,
-                course: document.getElementById("graduateCourse").value,
+                course: document.getElementById("graduateCourse").value === "Other"
+                    ? document.getElementById("otherGraduateCourse").value
+                    : document.getElementById("graduateCourse").value,
                 cgpa: document.getElementById("graduateCGPA").value,
                 year: document.getElementById("graduateYear").value
-            },
-            postGraduate: {
+            };
+        }
+
+        if (document.getElementById("postGraduateCheckbox").checked) {
+            educationData.postgraduate = {
                 institute: document.querySelector("#postGraduateSection input[type='text']").value,
                 cgpa: document.getElementById("postGraduateCGPA").value,
                 year: document.getElementById("postGraduateYear").value
-            }
-        };
+            };
+        }
 
-        // Notify parent window that the education section is complete
-        window.parent.postMessage({ section: "education", data: educationData }, "*");
+        try {
+            const docRef = doc(db, "users", user.uid);
+            await setDoc(docRef, { education: educationData }, { merge: true });
+
+            // Display success message
+            const successMessage = document.createElement("div");
+            successMessage.className = "message";
+            successMessage.style.display = "block";
+            successMessage.style.marginTop = "20px";
+            successMessage.style.padding = "15px";
+            successMessage.style.borderRadius = "5px";
+            successMessage.style.background = "#d4edda";
+            successMessage.style.color = "#155724";
+            successMessage.style.border = "1px solid #c3e6cb";
+            successMessage.textContent = "Education data saved successfully!";
+            document.querySelector(".container").appendChild(successMessage);
+
+            // Notify parent window
+            window.parent.postMessage({ section: "education" }, "*");
+        } catch (error) {
+            console.error("Error saving education data:", error);
+            alert("Error saving education data.");
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        populateYears("primaryYear");
+        populateYears("secondaryYear");
+        populateYears("graduateYear");
+        populateYears("postGraduateYear");
+        enforceDependencies();
+        loadEducationData(); // Load data on page load
     });
 </script>
+
 
 </html>
