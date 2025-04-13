@@ -37,6 +37,12 @@
             background: #f4f7f9;
         }
 
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
         .container {
             width: 95%;
             max-width: 800px;
@@ -152,6 +158,60 @@
                 <div id="aadhaar-preview" class="file-preview"></div>
             </div>
 
+            <div class="mb-3">
+                <label class="form-label">Income Certificate *</label>
+                <div class="upload-box" onclick="document.getElementById('income-file').click();">
+                    Click to Upload
+                    <input type="file" id="income-file" style="display: none;"
+                        onchange="previewFile('income-file', 'income-preview')">
+                </div>
+                <div id="income-preview" class="file-preview"></div>
+            </div>
+
+            <!-- BPL Card -->
+            <div class="mb-3">
+                <label class="form-label">BPL Card</label>
+                <div class="upload-box" onclick="document.getElementById('bpl-file').click();">
+                    Click to Upload
+                    <input type="file" id="bpl-file" style="display: none;"
+                        onchange="previewFile('bpl-file', 'bpl-preview')">
+                </div>
+                <div id="bpl-preview" class="file-preview"></div>
+            </div>
+
+            <!-- Ration Card -->
+            <div class="mb-3">
+                <label class="form-label">Ration Card</label>
+                <div class="upload-box" onclick="document.getElementById('ration-file').click();">
+                    Click to Upload
+                    <input type="file" id="ration-file" style="display: none;"
+                        onchange="previewFile('ration-file', 'ration-preview')">
+                </div>
+                <div id="ration-preview" class="file-preview"></div>
+            </div>
+
+            <!-- School/College ID -->
+            <div class="mb-3">
+                <label class="form-label">School/College ID</label>
+                <div class="upload-box" onclick="document.getElementById('id-file').click();">
+                    Click to Upload
+                    <input type="file" id="id-file" style="display: none;"
+                        onchange="previewFile('id-file', 'id-preview')">
+                </div>
+                <div id="id-preview" class="file-preview"></div>
+            </div>
+
+            <!-- MBOCWW Certificate -->
+            <div class="mb-3">
+                <label class="form-label">MBOCWW Certificate</label>
+                <div class="upload-box" onclick="document.getElementById('mbocww-file').click();">
+                    Click to Upload
+                    <input type="file" id="mbocww-file" style="display: none;"
+                        onchange="previewFile('mbocww-file', 'mbocww-preview')">
+                </div>
+                <div id="mbocww-preview" class="file-preview"></div>
+            </div>
+
             <!-- Progress Bar -->
             <div class="progress-container">
                 <div class="progress-bar" id="progress-bar"></div>
@@ -178,10 +238,11 @@
         document.getElementById("save-btn").addEventListener("click", function () {
             const documentData = {
                 disabilityCertificate: document.getElementById("disability-file").files[0]?.name || null,
-                aadhaarCard: document.getElementById("aadhaar-file").files[0]?.name || null
+                aadhaarCard: document.getElementById("aadhaar-file").files[0]?.name || null,
+                incomeCertificate: document.getElementById("income-file").files[0]?.name || null,
             };
 
-            if (documentData.disabilityCertificate && documentData.aadhaarCard) {
+            if (documentData.disabilityCertificate && documentData.aadhaarCard && documentData.incomeCertificate) {
                 // Notify parent window that the document section is complete
                 window.parent.postMessage({ section: "document", data: documentData }, "*");
 
@@ -193,16 +254,22 @@
             }
         });
 
-        
+
 
         async function saveDocuments() {
             const disabilityFileInput = document.getElementById('disability-file');
             const aadhaarFileInput = document.getElementById('aadhaar-file');
+            const incomeFileInput = document.getElementById('income-file');
+            const bplFile = document.getElementById('bpl-file').files[0];
+            const rashanFile = document.getElementById('ration-file').files[0];
+            const idFile = document.getElementById('id-file').files[0];
+            const mbocwwFile = document.getElementById('mbocww-file').files[0];
 
             const disabilityFile = disabilityFileInput.files[0];
             const aadhaarFile = aadhaarFileInput.files[0];
+            const incomeFile = incomeFileInput.files[0]; 
 
-            if (!disabilityFile || !aadhaarFile) {
+            if (!disabilityFile || !aadhaarFile || !incomeFile) {
                 alert("⚠ Please upload all required documents.");
                 return;
             }
@@ -234,18 +301,72 @@
                     contentType: 'application/pdf'
                 });
 
-            if (disabilityError || aadhaarError) {
-                alert("Error uploading documents!");
+            // Upload Income Certificate
+            const { error: incomeError } = await supabaseClient.storage
+                .from('user-documents')
+                .upload(`documents/${uid}/income-certificate.pdf`, incomeFile, {
+                    cacheControl: '3600',
+                    upsert: true,
+                    contentType: 'application/pdf'
+                });
+
+            // Upload optional documents (only if provided)
+            // Upload BPL Card  
+            if (bplFile) {
+                await supabaseClient.storage
+                    .from('user-documents')
+                    .upload(`documents/${uid}/bpl-card.pdf`, bplFile, {
+                        cacheControl: '3600',
+                        upsert: true,
+                        contentType: 'application/pdf'
+                    });
+            }
+
+            // Upload Ration Card
+            if (rashanFile) {
+                await supabaseClient.storage
+                    .from('user-documents')
+                    .upload(`documents/${uid}/rashan-card.pdf`, rashanFile, {
+                        cacheControl: '3600',
+                        upsert: true,
+                        contentType: 'application/pdf'
+                    });
+            }
+
+            // Upload School/College ID
+            if (idFile) {
+                await supabaseClient.storage
+                    .from('user-documents')
+                    .upload(`documents/${uid}/school-id.pdf`, idFile, {
+                        cacheControl: '3600',
+                        upsert: true,
+                        contentType: 'application/pdf'
+                    });
+            }
+
+            // Upload MBOCWW Certificate
+            if (mbocwwFile) {
+                await supabaseClient.storage
+                    .from('user-documents')
+                    .upload(`documents/${uid}/mbocww-certificate.pdf`, mbocwwFile, {
+                        cacheControl: '3600',
+                        upsert: true,
+                        contentType: 'application/pdf'
+                    });
+            }
+
+            if (disabilityError || aadhaarError || incomeError) {
+                alert("⚠ Error uploading required documents!");
                 console.error("Disability Error:", disabilityError);
                 console.error("Aadhaar Error:", aadhaarError);
+                console.error("Income Error:", incomeError);
                 return;
             }
 
-            // Progress & Message
             document.getElementById('progress-bar').style.width = "100%";
             alert("Documents uploaded successfully!");
 
-            // Optional: Post message to parent or save metadata in Firestore
+            // Notify parent window that the document upload is complete
             window.parent.postMessage({ section: "document", data: { status: "uploaded", uid } }, "*");
         }
 
