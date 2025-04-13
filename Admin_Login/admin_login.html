@@ -17,15 +17,14 @@
                 <h2>Admin Login</h2>
 
                 <form id="login-form" autocomplete="off">
-                    <input type="text" id="username" placeholder="Enter Username" required>
-                    <input type="password" id="password" placeholder="Enter Password" required>
-                    <button type="submit" class="btn">Login</button>
+                    <input type="email" id="username" placeholder="Enter Email" autocomplete="email" required>
+                    <input type="password" id="password" placeholder="Enter Password" autocomplete="current-password" required>
+                    <button type="submit" id="loginButton" class="btn">Login</button>
                 </form>
-                
             </div>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="admin_login.js"></script>
 </body>
 </html>
