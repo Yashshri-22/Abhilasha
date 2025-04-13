@@ -26,14 +26,14 @@ const email = document.getElementById("email");
 const password = document.getElementById("password");
 const loginButton = document.getElementById("loginButton");
 
-// check if user is already logged in
-const currentUser = localStorage.getItem("currentUser");
-if (currentUser) {
-    const user = JSON.parse(currentUser);
-    console.log("User is already logged in:", user);
-    // Redirect to the dashboard or another page
-    window.location.href = "../Dashboard/dashboard.html"; // Change this to your dashboard URL
-}
+// // check if user is already logged in
+// const currentUser = localStorage.getItem("currentUser");
+// if (currentUser) {
+//     const user = JSON.parse(currentUser);
+//     console.log("User is already logged in:", user);
+//     // Redirect to the dashboard or another page
+//     window.location.href = "../Dashboard/dashboard.html"; // Change this to your dashboard URL
+// }
 
 loginButton.addEventListener("click", async (e) => {
     e.preventDefault();
@@ -51,7 +51,7 @@ loginButton.addEventListener("click", async (e) => {
             alert("Login successful");
             localStorage.setItem("currentUser", JSON.stringify(result)); // Store user details in local storage
             // Redirect to the dashboard or another page
-            // window.location.href = "../Dashboard/dashboard.html"; // Change this to your dashboard URL
+            window.location.href = "../Dashboard/dashboard.html"; // Change this to your dashboard URL
         }
     } catch (error) {
         alert(`Login failed: ${error.message}`);

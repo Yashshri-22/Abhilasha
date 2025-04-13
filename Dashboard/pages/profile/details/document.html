@@ -1,10 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Documents</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkxeSRcylugPQdhABCFmWmTUYFQ868aDE",
+            authDomain: "abhilasha-fdbc0.firebaseapp.com",
+            projectId: "abhilasha-fdbc0",
+            storageBucket: "abhilasha-fdbc0.firebasestorage.app",
+            messagingSenderId: "11075472828",
+            appId: "1:11075472828:web:ed0a46285d259760f32fb9",
+            measurementId: "G-H49EPQK1PQ"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        const supabaseUrl = "https://sziyicfbmeeeekkakgui.supabase.co";
+        const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6aXlpY2ZibWVlZWVra2FrZ3VpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ0NzA3NDYsImV4cCI6MjA2MDA0Njc0Nn0.MSzzd3Dcf5yw7gfRewvDyi1cgExLUzO5RagMys5Wa9A";
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+    </script>
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -94,93 +118,138 @@
         }
 
         button:hover {
-            background-color: #ff7700; 
+            background-color: #ff7700;
             /* transform: scale(1.05);  */
         }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <h2 class="text-center">Upload Your Documents</h2>
-    <form id="upload-form">
-        <!-- Disability Certificate -->
-        <div class="mb-3">
-            <label class="form-label">Disability Certificate *</label>
-            <div class="upload-box" onclick="document.getElementById('disability-file').click();">
-                Click to Upload
-                <input type="file" id="disability-file" style="display: none;" onchange="previewFile('disability-file', 'disability-preview')">
+    <div class="container">
+        <h2 class="text-center">Upload Your Documents</h2>
+        <form id="upload-form">
+            <!-- Disability Certificate -->
+            <div class="mb-3">
+                <label class="form-label">Disability Certificate *</label>
+                <div class="upload-box" onclick="document.getElementById('disability-file').click();">
+                    Click to Upload
+                    <input type="file" id="disability-file" style="display: none;"
+                        onchange="previewFile('disability-file', 'disability-preview')">
+                </div>
+                <div id="disability-preview" class="file-preview"></div>
             </div>
-            <div id="disability-preview" class="file-preview"></div>
-        </div>
 
-        <!-- Aadhaar Card -->
-        <div class="mb-3">
-            <label class="form-label">Aadhaar Card *</label>
-            <div class="upload-box" onclick="document.getElementById('aadhaar-file').click();">
-                Click to Upload
-                <input type="file" id="aadhaar-file" style="display: none;" onchange="previewFile('aadhaar-file', 'aadhaar-preview')">
+            <!-- Aadhaar Card -->
+            <div class="mb-3">
+                <label class="form-label">Aadhaar Card *</label>
+                <div class="upload-box" onclick="document.getElementById('aadhaar-file').click();">
+                    Click to Upload
+                    <input type="file" id="aadhaar-file" style="display: none;"
+                        onchange="previewFile('aadhaar-file', 'aadhaar-preview')">
+                </div>
+                <div id="aadhaar-preview" class="file-preview"></div>
             </div>
-            <div id="aadhaar-preview" class="file-preview"></div>
-        </div>
 
-        <!-- Progress Bar -->
-        <div class="progress-container">
-            <div class="progress-bar" id="progress-bar"></div>
-        </div>
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
 
-        <!-- Save Button -->
-        <button id="save-btn" type="button" onclick="saveDocuments()">Save</button>
-    </form>
-</div>
+            <!-- Save Button -->
+            <button id="save-btn" type="button" onclick="saveDocuments()">Save</button>
+        </form>
+    </div>
 
-<script>
-    function previewFile(inputId, previewId) {
-        let fileInput = document.getElementById(inputId);
-        let preview = document.getElementById(previewId);
+    <script>
+        function previewFile(inputId, previewId) {
+            let fileInput = document.getElementById(inputId);
+            let preview = document.getElementById(previewId);
 
-        if (fileInput.files.length > 0) {
-            preview.innerText = "✔ File: " + fileInput.files[0].name;
-            preview.style.display = "block";
-        } else {
-            preview.style.display = "none";
+            if (fileInput.files.length > 0) {
+                preview.innerText = "✔ File: " + fileInput.files[0].name;
+                preview.style.display = "block";
+            } else {
+                preview.style.display = "none";
+            }
         }
-    }
 
-    document.getElementById("save-btn").addEventListener("click", function () {
-        const documentData = {
-            disabilityCertificate: document.getElementById("disability-file").files[0]?.name || null,
-            aadhaarCard: document.getElementById("aadhaar-file").files[0]?.name || null
-        };
+        document.getElementById("save-btn").addEventListener("click", function () {
+            const documentData = {
+                disabilityCertificate: document.getElementById("disability-file").files[0]?.name || null,
+                aadhaarCard: document.getElementById("aadhaar-file").files[0]?.name || null
+            };
 
-        if (documentData.disabilityCertificate && documentData.aadhaarCard) {
-            // Notify parent window that the document section is complete
-            window.parent.postMessage({ section: "document", data: documentData }, "*");
+            if (documentData.disabilityCertificate && documentData.aadhaarCard) {
+                // Notify parent window that the document section is complete
+                window.parent.postMessage({ section: "document", data: documentData }, "*");
 
-            // Update progress bar locally
-            document.getElementById("progress-bar").style.width = "100%";
+                // Update progress bar locally
+                document.getElementById("progress-bar").style.width = "100%";
+                // alert("Documents uploaded successfully!");
+            } else {
+                alert("⚠ Please upload all required documents.");
+            }
+        });
+
+        
+
+        async function saveDocuments() {
+            const disabilityFileInput = document.getElementById('disability-file');
+            const aadhaarFileInput = document.getElementById('aadhaar-file');
+
+            const disabilityFile = disabilityFileInput.files[0];
+            const aadhaarFile = aadhaarFileInput.files[0];
+
+            if (!disabilityFile || !aadhaarFile) {
+                alert("⚠ Please upload all required documents.");
+                return;
+            }
+
+            // Get Firebase user ID
+            const user = await firebase.auth().currentUser;
+            const uid = user?.uid;
+
+            if (!uid) {
+                alert("User not logged in.");
+                return;
+            }
+
+            // Upload Disability Certificate
+            const { error: disabilityError } = await supabaseClient.storage
+                .from('user-documents')
+                .upload(`documents/${uid}/disability-certificate-${Date.now()}.pdf`, disabilityFile, {
+                    cacheControl: '3600',
+                    upsert: false,
+                    
+                });
+
+            // Upload Aadhaar Card
+            const { error: aadhaarError } = await supabaseClient.storage
+                .from('user-documents')
+                .upload(`documents/${uid}/aadhaar-card-${Date.now()}.pdf`, aadhaarFile, {
+                    cacheControl: '3600',
+                    upsert: false,
+                    
+                });
+
+            if (disabilityError || aadhaarError) {
+                alert("Error uploading documents!");
+                console.error("Disability Error:", disabilityError);
+                console.error("Aadhaar Error:", aadhaarError);
+                return;
+            }
+
+            // Progress & Message
+            document.getElementById('progress-bar').style.width = "100%";
             alert("Documents uploaded successfully!");
-        } else {
-            alert("⚠ Please upload all required documents.");
+
+            // Optional: Post message to parent or save metadata in Firestore
+            window.parent.postMessage({ section: "document", data: { status: "uploaded", uid } }, "*");
         }
-    });
 
-    function saveDocuments() {
-        let disabilityFile = document.getElementById('disability-file').files.length > 0;
-        let aadhaarFile = document.getElementById('aadhaar-file').files.length > 0;
-
-        if (disabilityFile && aadhaarFile) {
-            let progressBar = document.getElementById('progress-bar');
-            progressBar.style.width = "100%";
-
-            setTimeout(() => {
-                alert("Documents uploaded successfully!");
-            }, 500);
-        } else {
-            alert("⚠ Please upload all required documents.");
-        }
-    }
-</script>
+    </script>
 
 </body>
+
 </html>

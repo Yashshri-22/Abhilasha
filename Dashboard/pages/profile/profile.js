@@ -4,44 +4,89 @@ window.addEventListener("DOMContentLoaded", function () {
     updateProgressBar();
 });
 
+const currentUserId = localStorage.getItem("currentUserId"); // Ensure this is set during login/signup
+const key = `progressData_${currentUserId}`;
+
 // Initialize progress tracking for all sections
 function initializeProgressTracking() {
-    const sections = ["personal", "education", "document", "bank", "divyang", "question"];
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || {};
+    let progressData = JSON.parse(localStorage.getItem(key));
 
-    sections.forEach(section => {
-        if (!progressData[section]) {
-            progressData[section] = false; // Mark section as incomplete by default
-        }
-    });
+    if (!progressData) {
+        progressData = {
+            personal: false,
+            education: false,
+            document: false,
+            bank: false,
+            divyang: false,
+            question: false
+        };
+        localStorage.setItem(key, JSON.stringify(progressData));
+    }
 
-    localStorage.setItem("progressData", JSON.stringify(progressData));
     updateProgressBar();
 }
 
 // Update the progress bar based on completed sections
 function updateProgressBar() {
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || {};
-    const totalSections = Object.keys(progressData).length;
-    const completedSections = Object.values(progressData).filter(isComplete => isComplete).length;
+    const progressData = JSON.parse(localStorage.getItem(key)) || {};
+    const totalSections = ["personal", "education", "document", "bank", "divyang", "question"];
 
-    const progress = Math.round((completedSections / totalSections) * 100);
-    document.getElementById("progress-bar").style.width = `${progress}%`;
-    document.getElementById("progress-text").textContent = `Profile Completion: ${progress}%`;
+    totalSections.forEach(section => {
+        if (!(section in progressData)) {
+            progressData[section] = false;
+        }
+    });
+
+    localStorage.setItem(key, JSON.stringify(progressData));
+
+    const completedSections = totalSections.filter(section => progressData[section]);
+    const progress = Math.round((completedSections.length / totalSections.length) * 100);
+
+    const progressBar = document.getElementById("progress-bar");
+    const progressText = document.getElementById("progress-text");
+
+    if (progressBar && progressText) {
+        progressBar.style.width = `${progress}%`;
+        progressText.textContent = `Profile Completion: ${progress}%`;
+    }
+
+    console.log("Progress Data:", progressData);
+    console.log("Completed Sections:", completedSections.length);
 }
 
-// Initialize event listeners for iframe communication and card toggling
+// Mark a section as complete and update the progress bar
+function markSectionAsComplete(section) {
+    const progressData = JSON.parse(localStorage.getItem(key)) || {};
+
+    if (!progressData[section]) {
+        progressData[section] = true;
+        localStorage.setItem(key, JSON.stringify(progressData));
+        updateProgressBar();
+    }
+}
+
+// Reset the profile, clearing all progress and data
+function resetProfile() {
+    if (confirm("Are you sure you want to reset your profile?")) {
+        localStorage.removeItem(key);
+        initializeProgressTracking();
+
+        document.getElementById("progress-bar").style.width = "0%";
+        document.getElementById("progress-text").textContent = "Profile Completion: 0%";
+
+        document.querySelectorAll("iframe").forEach(iframe => {
+            iframe.contentWindow.location.reload();
+        });
+
+        alert("Profile has been reset!");
+    }
+}
+
+// Same listener logic stays unchanged
 function initializeEventListeners() {
     window.addEventListener("message", function (event) {
         if (event.data && event.data.section) {
             markSectionAsComplete(event.data.section);
-
-            // Log data received from iframes
-            if (event.data.section === "education") {
-                console.log("Education Data:", event.data.data); // Store or process as needed
-            } else if (event.data.section === "document") {
-                console.log("Document Data:", event.data.data); // Store or process as needed
-            }
         }
     });
 
@@ -67,31 +112,3 @@ function initializeEventListeners() {
         resetBtn.addEventListener("click", resetProfile);
     }
 }
-
-// Mark a section as complete and update the progress bar
-function markSectionAsComplete(section) {
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || {};
-    progressData[section] = true; // Mark the section as complete
-    localStorage.setItem("progressData", JSON.stringify(progressData));
-    updateProgressBar();
-}
-
-// Reset the profile, clearing all progress and data
-function resetProfile() {
-    if (confirm("Are you sure you want to reset your profile?")) {
-        localStorage.removeItem("progressData");
-        initializeProgressTracking();
-
-        // Reset progress bar
-        document.getElementById("progress-bar").style.width = "0%";
-        document.getElementById("progress-text").textContent = "Profile Completion: 0%";
-
-        // Reload all iframes to reset their content
-        document.querySelectorAll("iframe").forEach(iframe => {
-            iframe.contentWindow.location.reload();
-        });
-
-        alert("Profile has been reset!");
-    }
-}
-
