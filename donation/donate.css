@@ -1,0 +1,216 @@
+/* General Reset */
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background-color: #053a68;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Wrapper for Split Layout */
+.wrapper {
+    display: flex;
+    height: 93vh;
+    width: 95vw;
+}
+
+/* Left Side - 60% Background */
+.left-side {
+    flex: 3;
+    background-image: url('../Assets/donate_card.jpg');
+    opacity: 0.85;
+    background-size: cover;
+    background-position: center;
+}
+
+/* Right Side - 40% Form */
+.right-side {
+    flex: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    padding: 40px;
+}
+
+/* Form Container (Directly on Background) */
+.form-container {
+    width: 100%;
+    max-width: 400px;
+}
+
+/* Heading */
+h2 {
+    color: #053a68;
+    margin-bottom: 10px;
+}
+
+/* Form Input Fields */
+.field{
+    width: 95%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.field:focus {
+    border-color: #053a68;
+    outline: none;
+}
+
+/* Button */
+.btn {
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    background-color: #e67e22;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #f39c12;
+}
+
+
+/* Instructions Section */
+.instructions {
+    margin-top: 15px;
+    text-align: left;
+}
+
+.instructions h3 {
+    font-size: 16px;
+    color: #000;
+}
+
+.instructions ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+.instructions li {
+    font-size: 14px;
+    color: #000;
+}
+
+/* Error Messages */
+.error-message {
+    font-size: 12px;
+    color: red;
+    display: block;
+    margin-top: 5px;
+}
+
+/* QR Dialog Styling */
+.qr-dialog {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    width: 400px;
+    height: 300px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    z-index: 2;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-dialog h3 {
+    /* margin-bottom: 20px; */
+    color: #053a68;
+}
+
+.qr-dialog img {
+    width: 200px;
+    height: 200px;
+    /* margin-bottom: 20px; */
+}
+
+.qr-dialog button {
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.qr-dialog button:hover {
+    background-color: #0056b3;
+}
+
+/* Done Button Styling */
+.qr-dialog .btn {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.qr-dialog .btn:hover {
+    background-color: #218838;
+}
+
+/* Close Icon Styling */
+.qr-dialog .close-icon {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 26px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+}
+
+.qr-dialog .close-icon:hover {
+    color: #ff0000;
+}
+
+/* Blurred Background Overlay */
+.blur-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .wrapper {
+        flex-direction: column;
+    }
+
+    .left-side {
+        height: 40vh;
+    }
+
+    .right-side {
+        height: 60vh;
+        justify-content: flex-start;
+        padding-top: 20px;
+    }
+}

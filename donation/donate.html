@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abhilasha-Divyang Scholarship Portal - Donate</title>
+    <link rel="stylesheet" href="donate.css">
+</head>
+
+<body>
+    <div class="wrapper">
+        <!-- Left Side with Background Image -->
+        <div class="left-side"></div>
+
+        <!-- Right Side with Form -->
+        <div class="right-side">
+            <div class="donation-box">
+                <h2>Support our Divyang Friends</h2>
+                <p class="tagline">Your contribution can empower the future of disabled students</p>
+
+                <form id="donation-form">
+                    <input type="text" class="field" id="name" placeholder="Enter Your Name" required>
+                    <input type="email" class="field" id="email" placeholder="Enter Your Email" required>
+                    <input type="number" class="field" id="amount" placeholder="Enter Donation Amount" required>
+                    <textarea class="field" id="message" placeholder="Enter a message (optional)" style="height: 100px;"></textarea>
+                    <button type="submit" id="donateButton" class="btn">Donate</button>
+                </form>
+
+                <!-- QR Code Container
+                <div id="qr-container" style="display: none; text-align: center; margin-top: 20px;">
+                    <h3>Scan the QR Code to Donate</h3>
+                    <img src="../Assets/qr_donate.jpg" alt="QR Code" style="width: 200px; height: 200px;">
+                </div> -->
+
+                <div class="instructions">
+                    <h3>Why Donate?</h3>
+                    <ul>
+                        <li>Your support helps provide scholarships to disabled students.</li>
+                        <li>Every contribution makes a difference in someone's life.</li>
+                        <li>Join us in empowering the future.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Code Dialog -->
+        <div id="qrDialog" class="qr-dialog">
+            <span id="closeQRButton" class="close-icon">&times;</span>
+            <h3>Scan the QR Code to Donate</h3>
+            <img src="../Assets/qr_donate.jpg" alt="QR Code">
+            <button id="doneButton" class="btn">Done</button>
+        </div>
+    </div>
+
+    <!-- Blurred Background Overlay -->
+    <div id="blurOverlay" class="blur-overlay"></div>
+
+    <script src="donate.js" type="module"></script>
+</body>
+
+</html>

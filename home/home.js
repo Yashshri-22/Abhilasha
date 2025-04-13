@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const donateCard = document.getElementById("option4");
 
     const registerDown = document.querySelector(".register-btn");
+    const donateDown = document.querySelector(".donate-btn");
 
     if (bannerButton) {
         console.log("Button found:", bannerButton);
@@ -52,7 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("Button found:", donateCard);
 
         donateCard.addEventListener("click", function () {
-            window.location.href = "../Login/register.html";
+            window.location.href = "../donation/donate.html";
         });
     } else {
         console.error("Button not found!");
@@ -63,6 +64,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
         registerDown.addEventListener("click", function () {
             window.location.href = "../Login/register.html";
+        });
+    } else {
+        console.error("Button not found!");
+    }
+
+    if (donateDown) {
+        console.log("Button found:", donateDown);
+
+        donateDown.addEventListener("click", function () {
+            window.location.href = "../donation/donate.html";
         });
     } else {
         console.error("Button not found!");
