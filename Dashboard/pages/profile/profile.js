@@ -1,3 +1,21 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyAkxeSRcylugPQdhABCFmWmTUYFQ868aDE",
+        authDomain: "abhilasha-fdbc0.firebaseapp.com",
+        projectId: "abhilasha-fdbc0",
+        storageBucket: "abhilasha-fdbc0.firebasestorage.app",
+        messagingSenderId: "11075472828",
+        appId: "1:11075472828:web:ed0a46285d259760f32fb9",
+        measurementId: "G-H49EPQK1PQ"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
 window.addEventListener("DOMContentLoaded", function () {
     initializeProgressTracking();
     initializeEventListeners();
@@ -65,9 +83,49 @@ function markSectionAsComplete(section) {
     }
 }
 
-// Reset the profile, clearing all progress and data
+// Reset the profile, clearing all progress and Firestore data
 function resetProfile() {
     if (confirm("Are you sure you want to reset your profile?")) {
+        const user = auth.currentUser;
+
+        if (user) {
+            const userId = user.uid;
+            const userDocRef = doc(db, "users", userId);
+
+            getDoc(userDocRef).then((docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+
+                    // Keep only email, appliedSchemes, and cancelledSchemes
+                    const updatedData = {
+                        email: data.email || "",
+                        appliedSchemes: data.appliedSchemes || [],
+                        cancelledSchemes: data.cancelledSchemes || [],
+                        personalDetails: null,
+                        bankDetails: null,
+                        divyangDetails: null,
+                        education: {
+                            primary: null,
+                            secondary: null,
+                            graduate: null,
+                            postgraduate: null
+                        },
+                        questions: null
+                    };
+
+                    setDoc(userDocRef, updatedData).then(() => {
+                        console.log("Firestore data reset successfully.");
+                        location.reload();
+                    }).catch((error) => {
+                        console.error("Error resetting Firestore data:", error);
+                    });
+                }
+            }).catch((error) => {
+                console.error("Error fetching Firestore user data:", error);
+            });
+        }
+
+        // Reset local progress data
         localStorage.removeItem(key);
         initializeProgressTracking();
 
@@ -81,6 +139,8 @@ function resetProfile() {
         alert("Profile has been reset!");
     }
 }
+
+
 
 // Same listener logic stays unchanged
 function initializeEventListeners() {
