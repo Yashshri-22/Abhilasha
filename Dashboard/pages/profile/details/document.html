@@ -219,19 +219,19 @@
             // Upload Disability Certificate
             const { error: disabilityError } = await supabaseClient.storage
                 .from('user-documents')
-                .upload(`documents/${uid}/disability-certificate-${Date.now()}.pdf`, disabilityFile, {
+                .upload(`documents/${uid}/disability-certificate.pdf`, disabilityFile, {
                     cacheControl: '3600',
-                    upsert: false,
-                    
+                    upsert: true,
+                    contentType: 'application/pdf'
                 });
 
             // Upload Aadhaar Card
             const { error: aadhaarError } = await supabaseClient.storage
                 .from('user-documents')
-                .upload(`documents/${uid}/aadhaar-card-${Date.now()}.pdf`, aadhaarFile, {
+                .upload(`documents/${uid}/aadhaar-card.pdf`, aadhaarFile, {
                     cacheControl: '3600',
-                    upsert: false,
-                    
+                    upsert: true,
+                    contentType: 'application/pdf'
                 });
 
             if (disabilityError || aadhaarError) {
