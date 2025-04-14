@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Ensure responsiveness on mobile -->
+  <title>About Us - Divyang Scholarship Portal</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0a3a63;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start; /* Changed from center to flex-start */
+      min-height: 100vh; /* Ensure full height for scrollable content */
+      overflow-x: hidden; /* Prevent horizontal scrolling */
+    }
+
+    .outer-container {
+      width: 95%;
+      max-width: 1200px; /* Added max-width for better responsiveness */
+      margin: 20px 0; /* Added margin for spacing */
+      border-radius: 15px;
+      background-color: white;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column; /* Adjusted for better stacking on smaller screens */
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .container {
+      display: flex;
+      flex: 1;
+      flex-direction: row; /* Default direction for larger screens */
+    }
+
+    .left {
+      flex: 1;
+      background-image: url('../Assets/bg.jpeg');
+      background-size: cover;
+      background-position: center;
+      border-top-left-radius: 15px;
+      border-bottom-left-radius: 15px;
+    }
+
+    .right {
+      flex: 1;
+      padding: 70px 60px;
+      background-color: #ffffff;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-top-right-radius: 15px;
+      border-bottom-right-radius: 15px;
+    }
+
+    .right h1 {
+      color: #003366;
+      font-size: 40px;
+      margin-bottom: 25px;
+    }
+
+    .right p {
+      font-size: 20px;
+      line-height: 1.8;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .footer {
+      font-size: 18px;
+      color: #444;
+      background-color: #f5f5f5;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .footer a {
+      color: #007acc;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 5px;
+      font-weight: 600;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column; /* Stack sections vertically */
+      }
+
+      .outer-container {
+        margin: 10px; /* Adjust margin for smaller screens */
+      }
+
+      .right {
+        padding: 20px; /* Adjust padding for smaller screens */
+      }
+
+      .right h1 {
+        font-size: 30px;
+      }
+
+      .right p {
+        font-size: 16px;
+      }
+
+      .footer {
+        font-size: 16px;
+        padding: 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .right {
+        padding: 15px; /* Further adjust padding for very small screens */
+      }
+
+      .right h1 {
+        font-size: 26px;
+      }
+
+      .right p {
+        font-size: 14px;
+      }
+
+      .footer {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="outer-container">
+    <div class="container">
+      <div class="left">
+        <!-- Image added via CSS, no img tag -->
+      </div>
+      <div class="right">
+        <div>
+          <h1>About Us</h1>
+          <p>
+            Welcome to the <strong>Divyang Scholarship Portal</strong>, a platform dedicated to empowering differently-abled individuals by helping them access educational opportunities through various scholarship schemes.
+          </p>
+          <p>
+            Our mission is to ensure that no talent is left behind due to financial constraints or lack of awareness. We connect eligible students with the right schemes, providing an easy-to-use interface to apply, upload documents, and track their scholarship status.
+          </p>
+          <p>
+            This initiative aims to bridge the gap between accessibility and opportunity, promoting inclusive growth and education for all. We are committed to transparency, simplicity, and a user-friendly experience.
+          </p>
+          <p>
+            Thank you for being a part of this mission. Together, we can create a more inclusive and educated society.
+          </p>
+        </div>
+
+        <div class="footer">
+          <strong>Contact us:</strong><br>
+          <a href="mailto:info@divyangportal.org">info@divyangportal.org</a><br>
+          <a href="mailto:support@divyangportal.org">support@divyangportal.org</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
