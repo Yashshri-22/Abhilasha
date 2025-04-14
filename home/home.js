@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("Button found:", infoCard);
 
         infoCard.addEventListener("click", function () {
-            window.location.href = "../Login/register.html";
+            window.location.href = "../information_home/information.html";
         });
     } else {
         console.error("Button not found!");

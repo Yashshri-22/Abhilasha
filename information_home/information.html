@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Available Schemes</title>
+  <link rel="stylesheet" href="information.css"/>
+</head>
+<body>
+  <div class="container">
+    <h2>Available Schemes</h2>
+    <p>Click on the <strong>View PDF</strong> button to get information about the scheme, eligibility criteria, and required documents.</p>
+    
+    <table>
+      <thead>
+        <tr>
+          <th class="view">#</th>
+          <th>Scheme Name</th>
+          <th>Description</th>
+          <th>Action</th> <!-- Column for the View PDF button -->
+        </tr>
+      </thead>
+      <tbody id="schemesTable">
+        <!-- Data will be loaded dynamically from schemes.js -->
+      </tbody>
+    </table>
+  </div>
+  
+  <script src="information.js" type="module"></script>
+</body>
+</html>
