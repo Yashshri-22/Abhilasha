@@ -169,22 +169,63 @@ body {
     gap: 8px;
     cursor: pointer;
     color: rgb(255, 255, 255);
+    position: relative;
+    overflow: hidden; /* Ensure the hover effect stays within the button */
+    background-color: inherit; /* Use the existing background color */
 }
 
-#option1{
-    background-color: #30a740;
+.option::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.5s ease-in-out; /* Smooth transition */
+    transform: translateX(-100%); /* Start off-screen */
+    z-index: 0; /* Ensure it stays behind the content */
 }
 
-#option2{
-    background-color: #368eb4;
+.option:hover::before {
+    transform: translateX(100%); /* Move the overlay from left to right */
 }
 
-#option3{
-    background-color: #c56345;
+.option img, .option p {
+    position: relative;
+    z-index: 1; /* Ensure content stays above the overlay */
 }
 
-#option4{
-    background-color: #544b8f;
+/* Unique colors for each option */
+#option1 {
+    background-color: #30a740; /* Green */
+}
+
+#option1::before {
+    background-color: #30b434; /* Lighter green */
+}
+
+#option2 {
+    background-color: #368eb4; /* Blue */
+}
+
+#option2::before {
+    background-color: #137cbe; /* Lighter blue */
+}
+
+#option3 {
+    background-color: #c56345; /* Red */
+}
+
+#option3::before {
+    background-color: #ec5029; /* Lighter red */
+}
+
+#option4 {
+    background-color: #544b8f; /* Purple */
+}
+
+#option4::before {
+    background-color: #332879; /* Lighter purple */
 }
 
 .arrow {
