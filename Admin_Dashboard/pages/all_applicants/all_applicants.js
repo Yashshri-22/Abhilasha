@@ -60,26 +60,28 @@ async function fetchUsersWithMultipleSchemes() {
         const data = docSnap.data();
         const appliedSchemes = data.appliedSchemes || [];
 
-        // Include users with at least one applied scheme
+        // Include users with at least one applied scheme without a state field
         appliedSchemes.forEach(scheme => {
-            // Find the scheme name using the scheme ID
-            const schemeDetails = schemes.find(s => s.id === scheme.id);
+            if (!scheme.state) { // Filter schemes without a state field
+                // Find the scheme name using the scheme ID
+                const schemeDetails = schemes.find(s => s.id === scheme.id);
 
-            // Extract only the date part from the appliedDate
-            const date = scheme.appliedDate ? scheme.appliedDate.split("T")[0] : "N/A";
+                // Extract only the date part from the appliedDate
+                const date = scheme.appliedDate ? scheme.appliedDate.split("T")[0] : "N/A";
 
-            // Push a new entry for each applied scheme
-            applicants.push({
-                uid: docSnap.id, // Add the unique applicant ID
-                userEntryNumber: userEntryNumber, // Same user entry number for all their schemes
-                first_name: data.personalDetails?.first_name || "N/A",
-                last_name: data.personalDetails?.last_name || "N/A",
-                udid: data.personalDetails?.udid || "N/A",
-                scheme: schemeDetails?.name || "N/A", // Fetch scheme name from schemes array
-                schemeId: scheme.id, // Add scheme ID
-                date: date, // Use only the date part
-                application: scheme.applicationPdf || "#"
-            });
+                // Push a new entry for each applied scheme
+                applicants.push({
+                    uid: docSnap.id, // Add the unique applicant ID
+                    userEntryNumber: userEntryNumber, // Same user entry number for all their schemes
+                    first_name: data.personalDetails?.first_name || "N/A",
+                    last_name: data.personalDetails?.last_name || "N/A",
+                    udid: data.personalDetails?.udid || "N/A",
+                    scheme: schemeDetails?.name || "N/A", // Fetch scheme name from schemes array
+                    schemeId: scheme.id, // Add scheme ID
+                    date: date, // Use only the date part
+                    application: scheme.applicationPdf || "#"
+                });
+            }
         });
 
         userEntryNumber++; // Increment the user entry number after processing all their schemes

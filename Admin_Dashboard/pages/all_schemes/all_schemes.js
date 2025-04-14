@@ -87,13 +87,14 @@ async function viewApplicants(schemeId) {
                         const data = docSnap.data();
                         const appliedSchemes = data.appliedSchemes || [];
 
-                        // Filter users who applied for the selected scheme
+                        // Filter users who applied for the selected scheme and do not have a state field
                         appliedSchemes.forEach(scheme => {
-                            if (scheme.id === schemeId) {
+                            if (scheme.id === schemeId && !scheme.state) {
                                 applicants.push({
                                     name: `${data.personalDetails?.first_name || "N/A"} ${data.personalDetails?.last_name || ""}`,
                                     udid: data.personalDetails?.udid || "N/A",
-                                    application: scheme.applicationPdf || "#"
+                                    application: scheme.applicationPdf || "#",
+                                    uid: docSnap.id // Use document ID as the UID
                                 });
                             }
                         });
@@ -115,7 +116,7 @@ async function viewApplicants(schemeId) {
                                 </tr>
                             </thead>
                             <tbody id="applicantsTable">
-                                ${generateApplicantsTable(applicants)}
+                                ${generateApplicantsTable(applicants, schemeId)}
                             </tbody>
                         </table>
                     `;
@@ -139,7 +140,7 @@ async function viewApplicants(schemeId) {
 }
 
 // Function to generate applicants table dynamically
-function generateApplicantsTable(applicants) {
+function generateApplicantsTable(applicants, schemeId) {
     if (applicants.length === 0) {
         return `<tr><td colspan="4" style="text-align: center;">No applicants found for this scheme.</td></tr>`;
     }
@@ -149,14 +150,14 @@ function generateApplicantsTable(applicants) {
             <td class="view">${index + 1}</td>
             <td>${applicant.name}</td>
             <td>${applicant.udid}</td>
-            <td class="view"><button class="viewButton" onclick="openPDF('${applicant.application}')">View</button></td>
+            <td class="view"><button class="viewButton" onclick="openPDF('${applicant.uid}', ${schemeId})">View</button></td>
         </tr>
     `).join("");
 }
 
-// Function to open application PDF
-function openPDF(pdfFile) {
-    window.open(`pdfs/${pdfFile}`, '_blank'); // Opens in a new tab
+// Function to open application page with applicant's user ID and scheme ID
+function openPDF(applicantUid, schemeId) {
+    window.location.href = `../view_application/view_application.html?userId=${applicantUid}&schemeId=${schemeId}`;
 }
 
 // Expose functions to the global scope

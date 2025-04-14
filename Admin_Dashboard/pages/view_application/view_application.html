@@ -83,8 +83,8 @@
     </div>
 
     <div class="button-container">
-      <button class="action-btn">Approve</button>
-      <button class="action-btn">Reject</button>
+      <button class="action-btn" onclick="updateState('approved')">Approve</button>
+      <button class="action-btn" onclick="updateState('rejected')">Reject</button>
       <button class="action-btn" onclick="toggleRemark()">Remark</button>
     </div>
 
@@ -185,6 +185,43 @@
       }
     }
     window.sendRemark = sendRemark;
+
+    // Function to update the state field in Firestore
+    async function updateState(newState) {
+      if (!currentUserId || !currentSchemeId) {
+        alert("User ID or Scheme ID is missing. Cannot update state.");
+        return;
+      }
+
+      try {
+        const userDocRef = doc(db, "users", currentUserId);
+        const userSnapshot = await getDoc(userDocRef);
+
+        if (userSnapshot.exists()) {
+          const userData = userSnapshot.data();
+          const appliedSchemes = userData.appliedSchemes || [];
+
+          // Find the scheme in the applied schemes array
+          const schemeIndex = appliedSchemes.findIndex(scheme => scheme.id === currentSchemeId);
+          if (schemeIndex !== -1) {
+            appliedSchemes[schemeIndex].state = newState; // Update the state field
+
+            await updateDoc(userDocRef, { appliedSchemes }); // Update the Firestore document
+            alert(`State updated to '${newState}' successfully.`);
+          } else {
+            alert("Scheme not found for the user.");
+          }
+        } else {
+          alert("User data not found.");
+        }
+      } catch (error) {
+        console.error("Error updating state:", error);
+        alert("An error occurred while updating the state. Please try again.");
+      }
+    }
+
+    // Expose the function to the global scope
+    window.updateState = updateState;
 
     // Function to retrieve user ID and scheme ID from query parameters
     async function getUserIdFromQueryAndFetchData() {
