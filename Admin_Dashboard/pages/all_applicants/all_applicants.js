@@ -70,11 +70,13 @@ async function fetchUsersWithMultipleSchemes() {
 
             // Push a new entry for each applied scheme
             applicants.push({
+                uid: docSnap.id, // Add the unique applicant ID
                 userEntryNumber: userEntryNumber, // Same user entry number for all their schemes
                 first_name: data.personalDetails?.first_name || "N/A",
                 last_name: data.personalDetails?.last_name || "N/A",
                 udid: data.personalDetails?.udid || "N/A",
                 scheme: schemeDetails?.name || "N/A", // Fetch scheme name from schemes array
+                schemeId: scheme.id, // Add scheme ID
                 date: date, // Use only the date part
                 application: scheme.applicationPdf || "#"
             });
@@ -131,7 +133,9 @@ function generateApplicantsTable() {
             <td>${applicant.udid}</td>
             <td>${applicant.scheme}</td>
             <td>${applicant.date}</td>
-            <td class="view"><button class="viewButton" onclick="openPDF('${applicant.application}')">View</button></td>
+            <td class="view">
+                <button class="viewButton" onclick="openPDF('${applicant.uid}', ${applicant.schemeId})">View</button>
+            </td>
         </tr>
     `).join("");
 }
@@ -152,14 +156,14 @@ function filterApplicants() {
             <td>${applicant.udid}</td>
             <td>${applicant.scheme}</td>
             <td>${applicant.date}</td>
-            <td class="view"><button class="viewButton" onclick="openPDF('${applicant.application}')">View</button></td>
+            <td class="view"><button class="viewButton" onclick="openPDF('${applicant.uid}', ${applicant.schemeId})">View</button></td>
         </tr>
     `).join("");
 }
 
-// Open application PDF
-function openPDF(pdfFile) {
-    window.open(`pdfs/${pdfFile}`, '_blank');
+// Open application page with applicant's user ID and scheme ID
+function openPDF(applicantUid, schemeId) {
+    window.location.href = `../view_application/view_application.html?userId=${applicantUid}&schemeId=${schemeId}`;
 }
 
 // Expose functions to the global scope

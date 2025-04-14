@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Profile</title>
+  <link rel="stylesheet" href="view_application.css">
+</head>
+
+<body>
+  <div class="profile-container">
+    <h1 class="main-heading">User Details</h1>
+
+    <div class="profile-section">
+      <h3>Personal Details</h3>
+      <div class="detail-row"><span class="label">First Name:</span><span class="value" id="firstName"></span></div>
+      <div class="detail-row"><span class="label">Last Name:</span><span class="value" id="lastName"></span></div>
+      <div class="detail-row"><span class="label">Father's/Husband's Name:</span><span class="value"
+          id="fatherName"></span></div>
+      <div class="detail-row"><span class="label">Mother's Name:</span><span class="value" id="motherName"></span></div>
+      <div class="detail-row"><span class="label">Gender:</span><span class="value" id="gender"></span></div>
+      <div class="detail-row"><span class="label">Address:</span><span class="value" id="address"></span></div>
+      <div class="detail-row"><span class="label">Pin Code:</span><span class="value" id="pinCode"></span></div>
+      <div class="detail-row"><span class="label">Education:</span><span class="value" id="education"></span></div>
+      <div class="detail-row"><span class="label">Aadhar Number:</span><span class="value" id="aadharNumber"></span>
+      </div>
+      <div class="detail-row"><span class="label">UDID Card:</span><span class="value" id="udidCard"></span></div>
+      <div class="detail-row"><span class="label">Phone Number:</span><span class="value" id="phoneNumber"></span></div>
+      <div class="detail-row"><span class="label">Alternate Phone Number:</span><span class="value"
+          id="alternatePhoneNumber"></span></div>
+      <div class="detail-row"><span class="label">Date of Birth:</span><span class="value" id="dob"></span></div>
+      <div class="detail-row"><span class="label">Marital Status:</span><span class="value" id="maritalStatus"></span>
+      </div>
+      <div class="detail-row"><span class="label">Are you literate?</span><span class="value" id="literacy"></span>
+      </div>
+    </div>
+
+    <!-- Education Background Section -->
+    <div class="profile-section education-section" id="educationSection">
+      <h3>Education Background</h3>
+      <!-- Sections for Primary, Secondary, Undergraduate, etc., will be dynamically populated -->
+    </div>
+
+    <div class="profile-section">
+      <h3>Document Uploads</h3>
+      <div class="document-row"><span class="label">Disability Certificate</span><span class="value"
+          id="disabilityCertificate"></span><button class="view-btn" id="viewDisabilityCertificate">View</button></div>
+      <div class="document-row"><span class="label">Aadhaar Card</span><span class="value"
+          id="aadhaarCard"></span><button class="view-btn" id="viewAadhaarCard">View</button></div>
+      <div class="document-row"><span class="label">Income Certificate</span><span class="value"
+          id="incomeCertificate"></span><button class="view-btn" id="viewIncomeCertificate">View</button></div>
+      <!-- Add other document rows dynamically -->
+    </div>
+
+    <div class="profile-section">
+      <h3>Bank Details</h3>
+      <div class="detail-row"><span class="label">Bank Name:</span><span class="value" id="bankName"></span></div>
+      <div class="detail-row"><span class="label">IFSC Code:</span><span class="value" id="ifscCode"></span></div>
+      <div class="detail-row"><span class="label">Account Number:</span><span class="value" id="accountNumber"></span>
+      </div>
+      <div class="detail-row"><span class="label">Annual Income:</span><span class="value" id="annualIncome"></span>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <h3>Divyang Details</h3>
+      <div class="detail-row"><span class="label">Divyang Type:</span><span class="value" id="divyangType"></span></div>
+      <div class="detail-row"><span class="label">Percentage of Disability:</span><span class="value"
+          id="disabilityPercentage"></span></div>
+      <div class="detail-row"><span class="label">Certificate Number:</span><span class="value"
+          id="certificateNumber"></span></div>
+      <div class="detail-row"><span class="label">Annual Income:</span><span class="value"
+          id="divyangAnnualIncome"></span></div>
+    </div>
+
+    <div class="profile-section">
+      <h3>Additional Information</h3>
+      <div class="detail-row"><span class="label">Are you employed?</span><span class="value"
+          id="employmentStatus"></span></div>
+      <div class="detail-row"><span class="label">Current Occupation:</span><span class="value"
+          id="currentOccupation"></span></div>
+    </div>
+
+    <div class="button-container">
+      <button class="action-btn">Approve</button>
+      <button class="action-btn">Reject</button>
+      <button class="action-btn" onclick="toggleRemark()">Remark</button>
+    </div>
+
+    <div class="remark-section" id="remarkSection" style="display: none;">
+      <textarea class="remark-textarea" placeholder="Enter your remark here..."></textarea>
+      <button class="action-btn" onclick="sendRemark()">Send</button>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAkxeSRcylugPQdhABCFmWmTUYFQ868aDE",
+      authDomain: "abhilasha-fdbc0.firebaseapp.com",
+      projectId: "abhilasha-fdbc0",
+      storageBucket: "abhilasha-fdbc0.firebasestorage.app",
+      messagingSenderId: "11075472828",
+      appId: "1:11075472828:web:ed0a46285d259760f32fb9",
+      measurementId: "G-H49EPQK1PQ"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let currentUserId = null;
+    let currentSchemeId = null;
+
+    // Function to toggle the remark section visibility
+    function toggleRemark() {
+      const remarkSection = document.getElementById("remarkSection");
+      if (remarkSection) {
+        // Toggle the display property between "block" and "none"
+        remarkSection.style.display = remarkSection.style.display === "none" || remarkSection.style.display === "" ? "block" : "none";
+      } else {
+        console.error("Remark section not found in the DOM.");
+      }
+    }
+
+    // Expose the function to the global scope
+    window.toggleRemark = toggleRemark;
+
+    // Ensure the remark section is hidden when the page loads
+    window.onload = () => {
+      const remarkSection = document.getElementById("remarkSection");
+      if (remarkSection) {
+        remarkSection.style.display = "none"; // Hide the remark section initially
+      }
+    };
+
+    // Function to send the remark
+    async function sendRemark() {
+      const remarkText = document.querySelector(".remark-textarea").value.trim();
+      if (!remarkText) {
+        alert("Please enter a remark before sending.");
+        return;
+      }
+
+      try {
+        const userDocRef = doc(db, "users", currentUserId);
+        const userSnapshot = await getDoc(userDocRef);
+
+        if (userSnapshot.exists()) {
+          const userData = userSnapshot.data();
+          const appliedSchemes = userData.appliedSchemes || [];
+
+          // Find the scheme in the applied schemes array
+          const schemeIndex = appliedSchemes.findIndex(scheme => scheme.id === currentSchemeId);
+          if (schemeIndex !== -1) {
+            const currentDate = new Date().toISOString().split("T")[0]; // Get the current date
+            appliedSchemes[schemeIndex].status = {
+              remark: remarkText,
+              date: currentDate
+            };
+
+            await updateDoc(userDocRef, { appliedSchemes }); // Update the Firestore document
+            alert("Remark added successfully.");
+            document.querySelector(".remark-textarea").value = ""; // Clear the textarea
+            document.getElementById("remarkSection").style.display = "none"; // Hide the remark section
+          } else {
+            alert("Scheme not found for the user.");
+          }
+        } else {
+          alert("User data not found.");
+        }
+      } catch (error) {
+        console.error("Error adding remark:", error);
+        alert("An error occurred while adding the remark. Please try again.");
+      }
+    }
+    window.sendRemark = sendRemark;
+
+    // Function to retrieve user ID and scheme ID from query parameters
+    async function getUserIdFromQueryAndFetchData() {
+      const params = new URLSearchParams(window.location.search);
+      currentUserId = params.get("userId");
+      currentSchemeId = parseInt(params.get("schemeId")); // Retrieve schemeId as an integer
+      if (currentUserId) {
+        console.log("User ID:", currentUserId); // Debugging: Log the user ID
+        console.log("Scheme ID:", currentSchemeId); // Debugging: Log the scheme ID
+        await fetchUserData(currentUserId, currentSchemeId);
+      } else {
+        console.error("No user ID found in query parameters.");
+      }
+    }
+
+    // Fetch user data from Firebase and populate the page
+    async function fetchUserData(userId, schemeId) {
+      try {
+        const userDoc = doc(db, "users", userId);
+        const userSnapshot = await getDoc(userDoc);
+
+        if (userSnapshot.exists()) {
+          const userData = userSnapshot.data();
+          console.log("Fetched User Data:", userData); // Debugging: Log the fetched data
+          populateUserData(userData, schemeId);
+        } else {
+          console.error("No user data found for the given ID.");
+          alert("No user data found for the given ID.");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        if (error.code === "permission-denied") {
+          alert("You do not have permission to access this data. Please contact the administrator.");
+        } else {
+          alert("An error occurred while fetching user data. Please try again later.");
+        }
+      }
+    }
+
+    // Populate the page with user data
+    function populateUserData(data, schemeId) {
+      document.getElementById("firstName").innerText = data.personalDetails?.first_name || "N/A";
+      document.getElementById("lastName").innerText = data.personalDetails?.last_name || "N/A";
+      document.getElementById("fatherName").innerText = data.personalDetails?.father_husband_name || "N/A";
+      document.getElementById("motherName").innerText = data.personalDetails?.mother_name || "N/A";
+      document.getElementById("gender").innerText = data.personalDetails?.gender || "N/A";
+      document.getElementById("address").innerText = data.personalDetails?.address || "N/A";
+      document.getElementById("pinCode").innerText = data.personalDetails?.pin_code || "N/A";
+      document.getElementById("education").innerText = data.personalDetails?.education || "N/A";
+      document.getElementById("aadharNumber").innerText = data.personalDetails?.aadhar || "N/A";
+      document.getElementById("udidCard").innerText = data.personalDetails?.udid || "N/A";
+      document.getElementById("phoneNumber").innerText = data.personalDetails?.phone || "N/A";
+      document.getElementById("alternatePhoneNumber").innerText = data.personalDetails?.alt_phone || "N/A";
+      document.getElementById("dob").innerText = data.personalDetails?.dob || "N/A";
+      document.getElementById("maritalStatus").innerText = data.personalDetails?.marital_status || "N/A";
+
+      // Populate education section dynamically if available
+      const educationSection = document.getElementById("educationSection");
+      const educationDetails = data.education || {};
+      const levels = [
+        { key: "primary", label: "Primary Education" },
+        { key: "secondary", label: "Secondary Education" },
+        { key: "graduate", label: "Graduate Education" },
+        { key: "postgraduate", label: "Postgraduate Education" }
+      ];
+
+      const educationContent = levels
+        .map(level => {
+          const edu = educationDetails[level.key];
+          if (edu && typeof edu === "object" && Object.keys(edu).length > 0) {
+            return `
+              <div class="education-level">
+                <h4 class="sub-heading">${level.label}</h4>
+                <div class="detail-row"><span class="label">Institute:</span><span class="value">${edu.institute || "N/A"}</span></div>
+                <div class="detail-row"><span class="label">Board:</span><span class="value">${edu.board || "N/A"}</span></div>
+                <div class="detail-row"><span class="label">Passing Year:</span><span class="value">${edu.year || "N/A"}</span></div>
+                <div class="detail-row"><span class="label">Percentage:</span><span class="value">${edu.marks || "N/A"}</span></div>
+              </div>
+            `;
+          }
+          return null;
+        })
+        .filter(content => content !== null)
+        .join("");
+
+      if (educationContent) {
+        educationSection.style.display = "block";
+        educationSection.innerHTML = `
+          <h3 class="main-heading">Education Details</h3>
+          ${educationContent}
+        `;
+      } else {
+        educationSection.style.display = "none"; // Hide section if no education details are available
+      }
+
+      // Populate document uploads
+      document.getElementById("disabilityCertificate").innerText = data.documents?.disability_certificate || "Not Uploaded";
+      document.getElementById("aadhaarCard").innerText = data.documents?.aadhaar_card || "Not Uploaded";
+      document.getElementById("incomeCertificate").innerText = data.documents?.income_certificate || "Not Uploaded";
+
+      // Populate bank details
+      document.getElementById("bankName").innerText = data.bankDetails?.bank_name || "N/A";
+      document.getElementById("ifscCode").innerText = data.bankDetails?.ifsc_code || "N/A";
+      document.getElementById("accountNumber").innerText = data.bankDetails?.account_number || "N/A";
+      document.getElementById("annualIncome").innerText = data.bankDetails?.annual_income || "N/A";
+
+      // Populate Divyang details
+      document.getElementById("divyangType").innerText = data.divyangDetails?.divyang_type || "N/A";
+      document.getElementById("disabilityPercentage").innerText = data.divyangDetails?.disability_percentage || "N/A";
+      document.getElementById("certificateNumber").innerText = data.divyangDetails?.certificate_number || "N/A";
+      document.getElementById("divyangAnnualIncome").innerText = data.divyangDetails?.annual_income || "N/A";
+
+      // Populate additional information
+      document.getElementById("employmentStatus").innerText = data.employmentDetails?.employment_status;
+      document.getElementById("currentOccupation").innerText = data.employmentDetails?.occupation || "N/A";
+
+      // Log the scheme ID for debugging
+      console.log("Scheme ID in populateUserData:", schemeId);
+
+      // Additional logic for scheme-specific data can be added here
+    }
+
+    // Check authentication state and fetch data
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("Authenticated user:", user.email); // Debugging: Log authenticated user
+        getUserIdFromQueryAndFetchData();
+      } else {
+        console.error("User not authenticated.");
+        alert("You are not authenticated. Please log in to access this page.");
+        window.location.href = "../login/login.html"; // Redirect to login page
+      }
+    });
+  </script>
+</body>
+
+</html>
