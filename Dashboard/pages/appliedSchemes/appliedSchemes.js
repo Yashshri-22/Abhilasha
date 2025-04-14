@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 
 // Firebase configuration
@@ -129,7 +129,55 @@ function closeDialog() {
     dialog.style.display = "none"; // Hide dialog
 }
 
+// Function to cancel a scheme
+async function cancelScheme(schemeId) {
+    const user = auth.currentUser;
+    if (!user) {
+        alert("User not logged in.");
+        return;
+    }
+
+    const userDocRef = doc(db, "users", user.uid);
+    const userDocSnap = await getDoc(userDocRef);
+
+    if (!userDocSnap.exists()) {
+        console.error("Error: User document not found in Firestore.");
+        alert("User data not found. Please try again.");
+        return;
+    }
+
+    const userData = userDocSnap.data();
+    const appliedSchemes = userData.appliedSchemes || [];
+    const cancelledSchemes = userData.cancelledSchemes || [];
+
+    // Find the scheme to cancel
+    const schemeToCancel = appliedSchemes.find(scheme => scheme.id === schemeId);
+    if (!schemeToCancel) {
+        alert("Scheme not found in applied schemes.");
+        return;
+    }
+
+    // Remove the scheme from appliedSchemes and add it to cancelledSchemes
+    const updatedAppliedSchemes = appliedSchemes.filter(scheme => scheme.id !== schemeId);
+    const updatedCancelledSchemes = [...cancelledSchemes, schemeToCancel];
+
+    try {
+        // Update Firestore with the new arrays
+        await updateDoc(userDocRef, {
+            appliedSchemes: updatedAppliedSchemes,
+            cancelledSchemes: updatedCancelledSchemes
+        });
+
+        alert(`The scheme has been cancelled.`);
+        location.reload(); // Reload the page to reflect changes
+    } catch (error) {
+        console.error("Error cancelling scheme:", error);
+        alert("An error occurred while cancelling the scheme. Please try again.");
+    }
+}
+
 // Call the function to load applied schemes on page load
 document.addEventListener("DOMContentLoaded", loadAppliedSchemes);
 window.openDialog = openDialog;
 window.closeDialog = closeDialog;
+window.cancelScheme = cancelScheme;
