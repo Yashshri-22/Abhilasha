@@ -98,21 +98,60 @@ async function loadAppliedSchemes() {
 }
 
 // Function to open the status dialog and populate remarks
-function openDialog(schemeId) {
+async function openDialog(schemeId) {
+    console.log("Fetching status for schemeId:", schemeId); // Log the schemeId being fetched
+
     const statusTable = document.getElementById("statusTable");
     statusTable.innerHTML = ""; // Clear previous data
 
-    if (remarksData[schemeId]) {
-        remarksData[schemeId].forEach(entry => {
-            let row = `
-                <tr>
-                    <td>${entry.remark}</td>
-                    <td>${entry.sentBy}</td>
-                    <td>${entry.date}</td>
-                </tr>
-            `;
-            statusTable.innerHTML += row;
-        });
+    const user = auth.currentUser;
+    if (!user) {
+        alert("User not logged in.");
+        return;
+    }
+
+    try {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            const appliedSchemes = userData.appliedSchemes || [];
+
+            // Validate and find the scheme in the applied schemes array
+            const scheme = appliedSchemes.find(s => s.id === schemeId);
+            if (!scheme) {
+                alert("The selected scheme does not exist in your applied schemes.");
+                return;
+            }
+            console.log("Scheme data:", scheme); // Log the scheme data for debugging
+            // Check if the scheme has a status array
+            if (scheme.status && scheme.status.length > 0) {
+                // Populate the status table with remarks
+                scheme.status.forEach(entry => {
+                    let row = `
+                        <tr>
+                            <td>${entry.remark}</td>
+                            <td>${entry.sentBy || "Admin"}</td>
+                            <td>${entry.date || "N/A"}</td>
+                        </tr>
+                    `;
+                    statusTable.innerHTML += row;
+                });
+            } else {
+                // Show "No remarks" if the status array is empty or not present
+                statusTable.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center;">No remarks</td>
+                    </tr>
+                `;
+            }
+        } else {
+            alert("User data not found.");
+        }
+    } catch (error) {
+        console.error("Error fetching status data:", error);
+        alert("An error occurred while fetching status data. Please try again.");
     }
 
     const dialog = document.getElementById("statusDialog");

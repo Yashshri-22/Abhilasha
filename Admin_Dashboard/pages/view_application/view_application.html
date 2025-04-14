@@ -161,10 +161,13 @@
           const schemeIndex = appliedSchemes.findIndex(scheme => scheme.id === currentSchemeId);
           if (schemeIndex !== -1) {
             const currentDate = new Date().toISOString().split("T")[0]; // Get the current date
-            appliedSchemes[schemeIndex].status = {
+
+            // Ensure the status array exists, then append the new remark
+            appliedSchemes[schemeIndex].status = appliedSchemes[schemeIndex].status || [];
+            appliedSchemes[schemeIndex].status.push({
               remark: remarkText,
               date: currentDate
-            };
+            });
 
             await updateDoc(userDocRef, { appliedSchemes }); // Update the Firestore document
             alert("Remark added successfully.");
