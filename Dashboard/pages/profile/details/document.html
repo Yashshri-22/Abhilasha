@@ -254,8 +254,6 @@
             }
         });
 
-
-
         async function saveDocuments() {
             const disabilityFileInput = document.getElementById('disability-file');
             const aadhaarFileInput = document.getElementById('aadhaar-file');
@@ -370,6 +368,54 @@
             window.parent.postMessage({ section: "document", data: { status: "uploaded", uid } }, "*");
         }
 
+        // Function to check uploaded documents in Supabase
+        async function checkUploadedDocuments(uid) {
+            console.log("User ID:", uid); // Debugging: Log the user ID
+
+            const documentKeys = [
+                { key: "disability-file", label: "Disability Certificate", fileName: "disability-certificate.pdf", previewId: "disability-preview" },
+                { key: "aadhaar-file", label: "Aadhaar Card", fileName: "aadhaar-card.pdf", previewId: "aadhaar-preview" },
+                { key: "income-file", label: "Income Certificate", fileName: "income-certificate.pdf", previewId: "income-preview" },
+                { key: "bpl-file", label: "BPL Card", fileName: "bpl-card.pdf", previewId: "bpl-preview" },
+                { key: "ration-file", label: "Ration Card", fileName: "rashan-card.pdf", previewId: "ration-preview" },
+                { key: "id-file", label: "School/College ID", fileName: "school-id.pdf", previewId: "id-preview" },
+                { key: "mbocww-file", label: "MBOCWW Certificate", fileName: "mbocww-certificate.pdf", previewId: "mbocww-preview" }
+            ];
+
+            for (const doc of documentKeys) {
+                try {
+                    const { data, error } = await supabaseClient.storage
+                        .from("user-documents")
+                        .createSignedUrl(`documents/${uid}/${doc.fileName}`, 3600); // Generate a signed URL valid for 1 hour
+
+                    const previewElement = document.getElementById(doc.previewId);
+
+                    if (error || !data) {
+                        previewElement.innerText = "Not Uploaded";
+                        previewElement.style.color = "red";
+                        previewElement.style.display = "block";
+                    } else {
+                        previewElement.innerText = `✔ Uploaded: ${doc.fileName}`;
+                        previewElement.style.color = "green";
+                        previewElement.style.display = "block";
+                    }
+                } catch (err) {
+                    console.error(`Error checking document for ${doc.label}:`, err);
+                }
+            }
+        }
+
+        // Ensure the user is logged in before checking uploaded documents
+        window.onload = () => {
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    console.log("Authenticated user:", user.uid); // Debugging: Log authenticated user
+                    await checkUploadedDocuments(user.uid);
+                } else {
+                    alert("User not logged in.");
+                }
+            });
+        };
     </script>
 
 </body>

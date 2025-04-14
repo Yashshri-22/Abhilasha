@@ -50,7 +50,14 @@
           id="aadhaarCard"></span><button class="view-btn" id="viewAadhaarCard">View</button></div>
       <div class="document-row"><span class="label">Income Certificate</span><span class="value"
           id="incomeCertificate"></span><button class="view-btn" id="viewIncomeCertificate">View</button></div>
-      <!-- Add other document rows dynamically -->
+      <div class="document-row"><span class="label">BPL Card</span><span class="value" id="bplCard"></span><button
+          class="view-btn" id="viewBplCard">View</button></div>
+      <div class="document-row"><span class="label">Ration Card</span><span class="value" id="rationCard"></span><button
+          class="view-btn" id="viewRationCard">View</button></div>
+      <div class="document-row"><span class="label">School/College ID</span><span class="value"
+          id="schoolId"></span><button class="view-btn" id="viewSchoolId">View</button></div>
+      <div class="document-row"><span class="label">MBOCWW Certificate</span><span class="value"
+          id="mbocwwCertificate"></span><button class="view-btn" id="viewMbocwwCertificate">View</button></div>
     </div>
 
     <div class="profile-section">
@@ -99,6 +106,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
     import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
     // Firebase configuration
     const firebaseConfig = {
@@ -110,6 +118,11 @@
       appId: "1:11075472828:web:ed0a46285d259760f32fb9",
       measurementId: "G-H49EPQK1PQ"
     };
+
+    // Supabase configuration
+    const supabaseUrl = "https://sziyicfbmeeeekkakgui.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6aXlpY2ZibWVlZWVra2FrZ3VpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ0NzA3NDYsImV4cCI6MjA2MDA0Njc0Nn0.MSzzd3Dcf5yw7gfRewvDyi1cgExLUzO5RagMys5Wa9A";
+    const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
@@ -204,7 +217,17 @@
           // Find the scheme in the applied schemes array
           const schemeIndex = appliedSchemes.findIndex(scheme => scheme.id === currentSchemeId);
           if (schemeIndex !== -1) {
-            appliedSchemes[schemeIndex].state = newState; // Update the state field
+            const currentDate = new Date().toISOString().split("T")[0]; // Get the current date
+
+            // Update the state field
+            appliedSchemes[schemeIndex].state = newState;
+
+            // Append the status to the status array
+            appliedSchemes[schemeIndex].status = appliedSchemes[schemeIndex].status || [];
+            appliedSchemes[schemeIndex].status.push({
+              status: newState,
+              date: currentDate
+            });
 
             await updateDoc(userDocRef, { appliedSchemes }); // Update the Firestore document
             alert(`State updated to '${newState}' successfully.`);
@@ -237,6 +260,41 @@
       }
     }
 
+    // Function to fetch document URLs from Supabase and update the view
+    async function fetchDocumentUrls(uid) {
+      const documentKeys = [
+        { key: "disabilityCertificate", label: "Disability Certificate", fileName: "disability-certificate.pdf" },
+        { key: "aadhaarCard", label: "Aadhaar Card", fileName: "aadhaar-card.pdf" },
+        { key: "incomeCertificate", label: "Income Certificate", fileName: "income-certificate.pdf" },
+        { key: "bplCard", label: "BPL Card", fileName: "bpl-card.pdf" },
+        { key: "rationCard", label: "Ration Card", fileName: "rashan-card.pdf" },
+        { key: "schoolId", label: "School/College ID", fileName: "school-id.pdf" },
+        { key: "mbocwwCertificate", label: "MBOCWW Certificate", fileName: "mbocww-certificate.pdf" }
+      ];
+
+      for (const doc of documentKeys) {
+        try {
+          const { data, error } = await supabaseClient.storage
+            .from("user-documents")
+            .createSignedUrl(`documents/${uid}/${doc.fileName}`, 3600); // Generate a signed URL valid for 1 hour
+
+          const statusElement = document.getElementById(`${doc.key}`);
+          const viewButton = document.getElementById(`view${doc.key.charAt(0).toUpperCase() + doc.key.slice(1)}`);
+
+          if (error || !data) {
+            statusElement.innerText = "Not Uploaded";
+            viewButton.style.display = "none"; // Hide the view button if the document is not available
+          } else {
+            statusElement.innerText = "Uploaded";
+            viewButton.style.display = "inline-block"; // Show the view button
+            viewButton.onclick = () => window.open(data.signedUrl, "_blank"); // Open the document in a new tab
+          }
+        } catch (err) {
+          console.error(`Error fetching URL for ${doc.label}:`, err);
+        }
+      }
+    }
+
     // Fetch user data from Firebase and populate the page
     async function fetchUserData(userId, schemeId) {
       try {
@@ -247,6 +305,9 @@
           const userData = userSnapshot.data();
           console.log("Fetched User Data:", userData); // Debugging: Log the fetched data
           populateUserData(userData, schemeId);
+
+          // Fetch document URLs from Supabase
+          await fetchDocumentUrls(userId);
         } else {
           console.error("No user data found for the given ID.");
           alert("No user data found for the given ID.");
