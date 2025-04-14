@@ -1,0 +1,120 @@
+/* General Reset */
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background-color: #053a68;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Wrapper for Split Layout */
+.contact-wrapper {
+    display: flex;
+    height: 93vh;
+    width: 95vw;
+}
+
+/* Left Side - 60% Background */
+.contact-left {
+    flex: 3;
+    background-image: url('../Assets/contact_bg.jpg');
+    opacity: 0.85;
+    background-size: cover;
+    background-position: center;
+}
+
+/* Right Side - 40% Form */
+.contact-right {
+    flex: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    padding: 40px;
+}
+
+/* Form Container (Directly on Background) */
+.contact-box {
+    width: 100%;
+    max-width: 400px;
+}
+
+/* Heading */
+h2 {
+    color: #053a68;
+    margin-bottom: 10px;
+}
+
+/* Form Input Fields */
+.contact-field {
+    width: 95%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.contact-field:focus {
+    border-color: #053a68;
+    outline: none;
+}
+
+/* Button */
+.contact-btn {
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    background-color: #e67e22;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.contact-btn:hover {
+    background-color: #f39c12;
+}
+
+/* Instructions Section */
+.contact-instructions {
+    margin-top: 15px;
+    text-align: left;
+}
+
+.contact-instructions h3 {
+    font-size: 16px;
+    color: #000;
+}
+
+.contact-instructions ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+.contact-instructions li {
+    font-size: 14px;
+    color: #000;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .contact-wrapper {
+        flex-direction: column;
+    }
+
+    .contact-left {
+        height: 40vh;
+    }
+
+    .contact-right {
+        height: 60vh;
+        justify-content: flex-start;
+        padding-top: 20px;
+    }
+}
