@@ -1,3 +1,23 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+import { getFirestore, doc, updateDoc, arrayUnion, getDoc } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyAkxeSRcylugPQdhABCFmWmTUYFQ868aDE",
+    authDomain: "abhilasha-fdbc0.firebaseapp.com",
+    projectId: "abhilasha-fdbc0",
+    storageBucket: "abhilasha-fdbc0.firebasestorage.app",
+    messagingSenderId: "11075472828",
+    appId: "1:11075472828:web:ed0a46285d259760f32fb9",
+    measurementId: "G-H49EPQK1PQ"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
 // Array of schemes
 const schemes = [
     { id: 1, name: "Sanjay Gandhi Niradhar Anudan Yojana", desc: "Monthly financial assistance to needy disabled persons.", pdf: "scheme1.pdf" },
@@ -34,6 +54,81 @@ function openPDF(pdfFile) {
 }
 
 // Function to handle apply button click
-function applyScheme(schemeName) {
-    alert(`You have applied for the "${schemeName}" scheme successfully!`);
+async function applyScheme(schemeName) {
+    const currentUserId = localStorage.getItem("currentUserId"); // Ensure this is set during login/signup
+    if (!currentUserId) {
+        console.error("Error: currentUserId is not set in localStorage.");
+        alert("Please log in to apply for schemes.");
+        return;
+    }
+
+    console.log(`Applying for scheme: ${schemeName}, User ID: ${currentUserId}`);
+
+    const key = `progressData_${currentUserId}`;
+    const progressData = JSON.parse(localStorage.getItem(key)) || {};
+
+    console.log(`Using progressData key: ${key}`);
+    console.log("Progress Data:", progressData);
+
+    const totalSections = ["personal", "education", "document", "bank", "divyang", "question"];
+    const completedSections = totalSections.filter(section => progressData[section]);
+    const progress = Math.round((completedSections.length / totalSections.length) * 100);
+
+    console.log(`Profile completion: ${progress}%`);
+
+    if (progress === 100) {
+        const scheme = schemes.find(s => s.name === schemeName);
+        if (!scheme) {
+            console.error("Error: Scheme not found.");
+            alert("Scheme not found.");
+            return;
+        }
+
+        try {
+            const userDocRef = doc(db, "users", currentUserId);
+            const userDocSnap = await getDoc(userDocRef);
+
+            if (!userDocSnap.exists()) {
+                console.error("Error: User document not found in Firestore.");
+                alert("User data not found. Please try again.");
+                return;
+            }
+
+            const userData = userDocSnap.data();
+            const appliedSchemes = userData.appliedSchemes || [];
+
+            // Check if the user has already applied for this scheme
+            if (appliedSchemes.some(s => s.id === scheme.id)) {
+                alert(`You have already applied for the "${schemeName}" scheme.`);
+                return;
+            }
+
+            // Check if the user has already applied for the maximum number of schemes
+            if (appliedSchemes.length >= 4) {
+                alert("You can apply for a maximum of 4 schemes.");
+                return;
+            }
+
+            const newScheme = {
+                id: scheme.id,
+                appliedDate: new Date().toISOString()
+            };
+
+            console.log("Updating Firestore with new scheme:", newScheme);
+
+            // Update Firestore with the new scheme
+            await updateDoc(userDocRef, {
+                appliedSchemes: arrayUnion(newScheme)
+            });
+
+            alert(`You have successfully applied for the "${schemeName}" scheme.`);
+        } catch (error) {
+            console.error("Error applying for scheme:", error);
+            alert("An error occurred while applying for the scheme. Please try again.");
+        }
+    } else {
+        alert("Please complete your profile 100% before applying for a scheme.");
+    }
 }
+window.applyScheme = applyScheme;
+window.openPDF = openPDF;
