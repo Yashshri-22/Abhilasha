@@ -157,9 +157,15 @@ async function cancelScheme(schemeId) {
         return;
     }
 
-    // Remove the scheme from appliedSchemes and add it to cancelledSchemes
+    // Remove the scheme from appliedSchemes and add it to cancelledSchemes with the current date
     const updatedAppliedSchemes = appliedSchemes.filter(scheme => scheme.id !== schemeId);
-    const updatedCancelledSchemes = [...cancelledSchemes, schemeToCancel];
+    const updatedCancelledSchemes = [
+        ...cancelledSchemes,
+        {
+            ...schemeToCancel,
+            cancelledDate: new Date().toISOString() // Add the current date as the cancellation date
+        }
+    ];
 
     try {
         // Update Firestore with the new arrays
