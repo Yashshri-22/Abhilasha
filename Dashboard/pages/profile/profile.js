@@ -22,7 +22,13 @@ window.addEventListener("DOMContentLoaded", function () {
     updateProgressBar();
 });
 
-const currentUserId = localStorage.getItem("currentUserId"); // Ensure this is set during login/signup
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+const currentUserId = currentUser?.uid;
+
+if (!currentUserId) {
+    console.error("User not logged in.");
+}
+
 const key = `progressData_${currentUserId}`;
 
 // Initialize progress tracking for all sections

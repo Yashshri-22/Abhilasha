@@ -76,7 +76,7 @@ async function viewApplicants(schemeId) {
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             // Check if the user is an admin
-            if (user.uid === "US1EFPivGhSyoL4q4Cw1oU997t92") { // Replace with your admin UID
+            if (user.uid === "i0VvTjgBQ3TBE2C7ctAf9wNOeFC2") { // Replace with your admin UID
                 try {
                     const usersRef = collection(db, "users");
                     const snapshot = await getDocs(usersRef);
