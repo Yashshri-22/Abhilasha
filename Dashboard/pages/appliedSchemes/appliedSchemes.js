@@ -1,4 +1,55 @@
 // ===============================
+// 📦 SCHEMES DATA
+// ===============================
+const schemes = [
+  {
+    id: 1,
+    name: "Sanjay Gandhi Niradhar Anudan Yojana",
+    desc: "Monthly financial assistance to needy disabled persons.",
+  },
+  {
+    id: 2,
+    name: "Swavalamban Yojana",
+    desc: "Financial support for self-employment ventures.",
+  },
+  {
+    id: 3,
+    name: "Housing Scheme for Disabled",
+    desc: "Affordable housing units.",
+  },
+  {
+    id: 4,
+    name: "Free Travel Concession Scheme",
+    desc: "Free travel in state transport buses.",
+  },
+  { id: 5, name: "Scholarship Scheme", desc: "Financial aid for students." },
+  {
+    id: 6,
+    name: "Niramaya Health Insurance",
+    desc: "Health insurance coverage.",
+  },
+  {
+    id: 7,
+    name: "Skill Development Scheme",
+    desc: "Vocational training programs.",
+  },
+  {
+    id: 8,
+    name: "Assistive Devices Scheme",
+    desc: "Support for prosthetic devices.",
+  },
+  {
+    id: 9,
+    name: "Free Bus Pass Scheme",
+    desc: "Concessional travel in PMPML.",
+  },
+  {
+    id: 10,
+    name: "75% Disability Assistance",
+    desc: "One-time financial support.",
+  },
+];
+// ===============================
 // 🔐 AUTH
 // ===============================
 function getUserId() {
@@ -39,26 +90,29 @@ async function loadAppliedSchemes() {
     tableBody.innerHTML = "";
 
     appliedSchemes.forEach((appliedScheme, index) => {
-      const scheme = schemes.find(s => s.id === appliedScheme.id);
+      const scheme = schemes.find((s) => s.id === appliedScheme.id);
 
       if (scheme) {
         let row = `
-          <tr>
-            <td>${index + 1}</td>
-            <td>${scheme.name}</td>
-            <td>${scheme.desc}</td>
-            <td>
-              <button onclick="openDialog(${scheme.id})">Check Status</button>
-            </td>
-            <td>
-              <button onclick="cancelScheme(${scheme.id})">Cancel</button>
-            </td>
-          </tr>
-        `;
+  <tr>
+    <td>${index + 1}</td>
+    <td>${scheme.name}</td>
+    <td>${scheme.desc}</td>
+    <td>
+      <button id="status-btn" onclick="openDialog(${scheme.id})">
+        Check Status
+      </button>
+    </td>
+    <td>
+      <button id="cancel-btn" onclick="cancelScheme(${scheme.id})">
+        Cancel
+      </button>
+    </td>
+  </tr>
+`;
         tableBody.innerHTML += row;
       }
     });
-
   } catch (err) {
     console.error("Load Error:", err);
   }
@@ -81,7 +135,7 @@ async function openDialog(schemeId) {
     const data = await res.json();
 
     const appliedSchemes = data.appliedSchemes || [];
-    const scheme = appliedSchemes.find(s => s.id === schemeId);
+    const scheme = appliedSchemes.find((s) => s.id === schemeId);
 
     if (!scheme) {
       alert("Scheme not found");
@@ -89,12 +143,12 @@ async function openDialog(schemeId) {
     }
 
     if (scheme.status && scheme.status.length > 0) {
-      scheme.status.forEach(entry => {
+      scheme.status.forEach((entry) => {
         statusTable.innerHTML += `
           <tr>
             <td>${entry.remark}</td>
             <td>${entry.sentBy || "Admin"}</td>
-            <td>${entry.date || "N/A"}</td>
+            <td>${entry.date ? new Date(entry.date).toLocaleString() : "N/A"}</td>
           </tr>
         `;
       });
@@ -105,7 +159,6 @@ async function openDialog(schemeId) {
         </tr>
       `;
     }
-
   } catch (err) {
     console.error(err);
   }
@@ -127,14 +180,14 @@ async function cancelScheme(schemeId) {
     let appliedSchemes = data.appliedSchemes || [];
     let cancelledSchemes = data.cancelledSchemes || [];
 
-    const schemeToCancel = appliedSchemes.find(s => s.id === schemeId);
+    const schemeToCancel = appliedSchemes.find((s) => s.id === schemeId);
 
     if (!schemeToCancel) {
       alert("Scheme not found");
       return;
     }
 
-    appliedSchemes = appliedSchemes.filter(s => s.id !== schemeId);
+    appliedSchemes = appliedSchemes.filter((s) => s.id !== schemeId);
 
     cancelledSchemes.push({
       ...schemeToCancel,
@@ -155,7 +208,6 @@ async function cancelScheme(schemeId) {
 
     alert("Scheme cancelled");
     location.reload();
-
   } catch (err) {
     console.error(err);
     alert("Error cancelling scheme");
