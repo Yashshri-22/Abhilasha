@@ -106,9 +106,9 @@ schemes.forEach((scheme, index) => {
 
 // Function to open PDF
 function openPDF(pdfFile) {
-  window.open(`scheme_pdfs/${pdfFile}`, "_blank"); // Opens in a new tab
+  const baseURL = "https://abhilasha-documents.s3.eu-north-1.amazonaws.com/schemes/";
+  window.open(baseURL + pdfFile, "_blank");
 }
-
 // Function to handle apply button click
 async function applyScheme(schemeName) {
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
