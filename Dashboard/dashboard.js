@@ -67,12 +67,14 @@
 // ===============================
 // 🔐 AUTH CHECK (Cognito)
 // ===============================
-const token = JSON.parse(localStorage.getItem("idToken"));
+const token = localStorage.getItem("idToken"); // ✅ NO JSON.parse
 
 if (!token) {
+    console.log("❌ No token found");
     window.location.href = "../Login/login.html";
+} else {
+    console.log("✅ User authenticated");
 }
-
 
 // ===============================
 // 📄 LOAD PAGE IN IFRAME
@@ -81,7 +83,6 @@ function loadPage(pageUrl) {
     document.getElementById("mainFrame").src = pageUrl;
 }
 
-
 // ===============================
 // 🚪 LOGOUT FUNCTION
 // ===============================
@@ -89,11 +90,10 @@ function logout() {
     localStorage.removeItem("idToken");
     localStorage.removeItem("accessToken");
 
-    console.log("User logged out");
+    console.log("🚪 User logged out");
 
     window.location.href = "../Login/login.html";
 }
-
 
 // ===============================
 // 🌍 MAKE GLOBAL

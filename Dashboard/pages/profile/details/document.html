@@ -364,13 +364,23 @@
         }
 
         // Get Firebase user ID
-        const user = await firebase.auth().currentUser;
-        const uid = user?.uid;
+        // 🔐 Cognito token instead of Firebase auth
+        const token = localStorage.getItem("idToken");
 
-        if (!uid) {
-          alert("User not logged in.");
+        if (!token) {
+          window.top.location.href = "../../Login/login.html";
           return;
         }
+
+        let decoded;
+        try {
+          decoded = JSON.parse(atob(token.split(".")[1]));
+        } catch (e) {
+          window.top.location.href = "../../Login/login.html";
+          return;
+        }
+
+        const uid = decoded.sub; // using email as user ID
 
         // Upload Disability Certificate
         // const { error: disabilityError } = await supabaseClient.storage
@@ -579,14 +589,18 @@
 
       // Ensure the user is logged in before checking uploaded documents
       window.onload = () => {
-        auth.onAuthStateChanged(async (user) => {
-          if (user) {
-            console.log("Authenticated user:", user.uid); // Debugging: Log authenticated user
-            // await checkUploadedDocuments(user.uid);
-          } else {
-            alert("User not logged in.");
+        const token = localStorage.getItem("idToken");
+
+        if (token) {
+          try {
+            const decoded = JSON.parse(atob(token.split(".")[1]));
+            console.log("Authenticated user:", decoded.sub);
+          } catch (e) {
+            window.top.location.href = "../../Login/login.html";
           }
-        });
+        } else {
+          window.top.location.href = "../../Login/login.html";
+        }
       };
     </script>
   </body>

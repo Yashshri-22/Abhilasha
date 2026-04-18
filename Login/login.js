@@ -125,8 +125,8 @@
 AWS.config.region = "eu-north-1";
 
 const poolData = {
-  UserPoolId: "eu-north-1_helCUhBlp", // ✅ your pool id
-  ClientId: "mhpn6e3ip48mpua0chl7a2or3", // ✅ your client id
+  UserPoolId: "eu-north-1_helCUhBlp",
+  ClientId: "mhpn6e3ip48mpua0chl7a2or3",
 };
 
 const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
@@ -159,23 +159,19 @@ loginButton.addEventListener("click", function (e) {
 // 🔐 LOGIN FUNCTION (COGNITO)
 // ===============================
 function loginUser(email, password) {
-  const authenticationData = {
-    Username: email,
-    Password: password,
-  };
+  const authenticationDetails =
+    new AmazonCognitoIdentity.AuthenticationDetails({
+      Username: email,
+      Password: password,
+    });
 
-  const authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(
-    authenticationData,
-  );
-
-  const userData = {
+  const cognitoUser = new AmazonCognitoIdentity.CognitoUser({
     Username: email,
     Pool: userPool,
-  };
-
-  const cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+  });
 
   cognitoUser.authenticateUser(authenticationDetails, {
+
     // ===============================
     // ✅ SUCCESS
     // ===============================
@@ -183,19 +179,18 @@ function loginUser(email, password) {
       const idToken = result.getIdToken().getJwtToken();
       const accessToken = result.getAccessToken().getJwtToken();
 
-      console.log("✅ Login success");
-      console.log("Token:", idToken);
+      console.log("✅ Login successful");
 
-      // 🔥 STORE TOKENS
-      localStorage.setItem("idToken", JSON.stringify(idToken));
+      // ✅ STORE TOKEN PROPERLY (NO JSON.stringify)
+      localStorage.setItem("idToken", idToken);
       localStorage.setItem("accessToken", accessToken);
 
       alert("Login successful 🚀");
 
-      // 🔥 DELAYED REDIRECT (prevents race condition)
+      // redirect to dashboard
       setTimeout(() => {
-        window.location.href = "../Dashboard/dashboard.html"; 
-      }, 500);
+        window.location.href = "../Dashboard/dashboard.html";
+      }, 300);
     },
 
     // ===============================

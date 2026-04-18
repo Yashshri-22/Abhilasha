@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bank Details</title>
     <link rel="shortcut icon" href="../Assets/logo.jpg" type="image/x-icon">
-    <!-- Firebase SDKs -->
+
+    <!-- Firebase (ONLY DB) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
     <style>
@@ -28,7 +28,6 @@
             border-radius: 10px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             background: white;
-            position: relative;
         }
 
         form label {
@@ -66,10 +65,6 @@
             margin: 20px auto;
         }
 
-        button:hover {
-            background: #ff7700;
-        }
-
         .message {
             display: none;
             margin-top: 20px;
@@ -77,138 +72,155 @@
             border-radius: 5px;
             background: #d4edda;
             color: #155724;
-            border: 1px solid #c3e6cb;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <form id="bank-form">
-            <label>Bank Name:
-                <input type="text" name="bank_name" placeholder="Enter Bank Name" required>
-            </label>
 
-            <label>IFSC Code:
-                <input type="text" id="ifsc_code" name="ifsc_code" placeholder="Enter IFSC Code" required maxlength="11">
-                <div class="error" id="ifsc-error"></div>
-            </label>
+<div class="container">
+    <form id="bank-form">
 
-            <label>Account Number:
-                <input type="text" id="account_number" name="account_number" placeholder="Enter Account Number" required>
-                <div class="error" id="account-error"></div>
-            </label>
+        <label>Bank Name:
+            <input type="text" id="bank_name" required>
+        </label>
 
-            <label>Annual Income:
-                <input type="text" id="annual_income" name="annual_income" placeholder="Enter Annual Income" required>
-                <div class="error" id="income-error"></div>
-            </label>
+        <label>IFSC Code:
+            <input type="text" id="ifsc_code" maxlength="11" required>
+            <div class="error" id="ifsc-error"></div>
+        </label>
 
-            <button id="save-btn" type="submit">Save</button>
-        </form>
-        <div class="message" id="bank-success-message">Bank details submitted successfully.</div>
+        <label>Account Number:
+            <input type="text" id="account_number" required>
+            <div class="error" id="account-error"></div>
+        </label>
+
+        <label>Annual Income:
+            <input type="text" id="annual_income" required>
+            <div class="error" id="income-error"></div>
+        </label>
+
+        <button type="submit">Save</button>
+    </form>
+
+    <div class="message" id="success-msg">
+        Bank details saved successfully
     </div>
+</div>
 
-    <script>
-        // Firebase config
-        const firebaseConfig = {
-            apiKey: "AIzaSyAkxeSRcylugPQdhABCFmWmTUYFQ868aDE",
-            authDomain: "abhilasha-fdbc0.firebaseapp.com",
-            projectId: "abhilasha-fdbc0",
-            storageBucket: "abhilasha-fdbc0.appspot.com",
-            messagingSenderId: "11075472828",
-            appId: "1:11075472828:web:ed0a46285d259760f32fb9",
-            measurementId: "G-H49EPQK1PQ"
-        };
+<script>
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
+    // ===============================
+    // 🔐 COGNITO AUTH CHECK
+    // ===============================
+    function parseJwt(token) {
+        return JSON.parse(atob(token.split('.')[1]));
+    }
 
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                const uid = user.uid;
-                const userDocRef = db.collection('users').doc(uid);
+    const token = localStorage.getItem("idToken");
 
-                // Load bank data
-                userDocRef.get().then(doc => {
-                    if (doc.exists && doc.data().bankDetails) {
-                        const data = doc.data().bankDetails;
-                        document.querySelector('input[name="bank_name"]').value = data.bank_name || '';
-                        document.getElementById('ifsc_code').value = data.ifsc_code || '';
-                        document.getElementById('account_number').value = data.account_number || '';
-                        document.getElementById('annual_income').value = data.annual_income || '';
-                    }
-                });
+    if (!token) {
+        window.top.location.href = "../../Login/login.html";
+    }
 
-                // Form submit handler
-                document.getElementById("bank-form").addEventListener("submit", function (e) {
-                    e.preventDefault();
+    let decoded;
+    try {
+        decoded = parseJwt(token);
 
-                    const bank_name = document.querySelector('input[name="bank_name"]').value.trim();
-                    const ifsc_code = document.getElementById('ifsc_code').value.trim().toUpperCase();
-                    const account_number = document.getElementById('account_number').value.trim();
-                    const annual_income = document.getElementById('annual_income').value.trim();
+        const now = Math.floor(Date.now() / 1000);
+        if (decoded.exp < now) {
+            localStorage.clear();
+            window.top.location.href = "../../Login/login.html";
+        }
 
-                    let isValid = true;
+    } catch (e) {
+        localStorage.clear();
+        window.top.location.href = "../../Login/login.html";
+    }
 
-                    // Reset error messages
-                    document.getElementById("ifsc-error").textContent = "";
-                    document.getElementById("account-error").textContent = "";
-                    document.getElementById("income-error").textContent = "";
+    const userId = decoded.email;
 
-                    // IFSC validation
-                    if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc_code)) {
-                        document.getElementById("ifsc-error").textContent = "Invalid IFSC Code (Format: XXXX0YYYYYY)";
-                        isValid = false;
-                    }
+    // ===============================
+    // 🔥 FIREBASE (ONLY DB)
+    // ===============================
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_DOMAIN",
+        projectId: "YOUR_PROJECT_ID"
+    };
 
-                    // Account number validation (8–18 digits)
-                    if (!/^\d{8,18}$/.test(account_number)) {
-                        document.getElementById("account-error").textContent = "Account number must be 8–18 digits.";
-                        isValid = false;
-                    }
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-                    // Annual income validation (only numbers)
-                    if (!/^\d+$/.test(annual_income)) {
-                        document.getElementById("income-error").textContent = "Income must contain only digits.";
-                        isValid = false;
-                    }
+    const userDocRef = db.collection("users").doc(userId);
 
-                    if (!isValid) return;
+    // ===============================
+    // 📥 LOAD DATA
+    // ===============================
+    userDocRef.get().then(doc => {
+        if (doc.exists && doc.data().bankDetails) {
+            const data = doc.data().bankDetails;
 
-                    // Save to Firestore
-                    userDocRef.set({
-                        bankDetails: {
-                            bank_name,
-                            ifsc_code,
-                            account_number,
-                            annual_income
-                        }
-                    }, { merge: true }).then(() => {
-                        document.getElementById("bank-success-message").style.display = "block";
-                        window.parent.postMessage({ section: "bank", data: { bank_name } }, "*");
-                        window.parent.postMessage("sectionSaved", "*");
-                    }).catch((error) => {
-                        console.error("Error saving bank details:", error);
-                    });
-                });
+            document.getElementById("bank_name").value = data.bank_name || "";
+            document.getElementById("ifsc_code").value = data.ifsc_code || "";
+            document.getElementById("account_number").value = data.account_number || "";
+            document.getElementById("annual_income").value = data.annual_income || "";
+        }
+    });
 
-                // Restrict input to digits only for income and account
-                document.getElementById("annual_income").addEventListener("input", function () {
-                    this.value = this.value.replace(/\D/g, '');
-                });
+    // ===============================
+    // 💾 SAVE DATA
+    // ===============================
+    document.getElementById("bank-form").addEventListener("submit", function (e) {
 
-                document.getElementById("account_number").addEventListener("input", function () {
-                    this.value = this.value.replace(/\D/g, '');
-                });
+        e.preventDefault();
 
-                document.getElementById("ifsc_code").addEventListener("input", function () {
-                    this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 11);
-                });
+        const bank_name = document.getElementById("bank_name").value.trim();
+        const ifsc_code = document.getElementById("ifsc_code").value.trim().toUpperCase();
+        const account_number = document.getElementById("account_number").value.trim();
+        const annual_income = document.getElementById("annual_income").value.trim();
+
+        let valid = true;
+
+        // Reset errors
+        document.getElementById("ifsc-error").textContent = "";
+        document.getElementById("account-error").textContent = "";
+        document.getElementById("income-error").textContent = "";
+
+        if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc_code)) {
+            document.getElementById("ifsc-error").textContent = "Invalid IFSC";
+            valid = false;
+        }
+
+        if (!/^\d{8,18}$/.test(account_number)) {
+            document.getElementById("account-error").textContent = "Invalid account number";
+            valid = false;
+        }
+
+        if (!/^\d+$/.test(annual_income)) {
+            document.getElementById("income-error").textContent = "Only numbers allowed";
+            valid = false;
+        }
+
+        if (!valid) return;
+
+        userDocRef.set({
+            bankDetails: {
+                bank_name,
+                ifsc_code,
+                account_number,
+                annual_income
             }
-        });
-    </script>
-</body>
+        }, { merge: true })
+        .then(() => {
+            document.getElementById("success-msg").style.display = "block";
 
+            // notify parent
+            window.parent.postMessage({ section: "bank" }, "*");
+        });
+    });
+
+</script>
+
+</body>
 </html>

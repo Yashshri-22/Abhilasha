@@ -129,95 +129,129 @@
     </div>
 
     <script>
-        // Firebase configuration (same as Personal Details)
-        const firebaseConfig = {
-            apiKey: "AIzaSyAkxeSRcylugPQdhABCFmWmTUYFQ868aDE",
-            authDomain: "abhilasha-fdbc0.firebaseapp.com",
-            projectId: "abhilasha-fdbc0",
-            storageBucket: "abhilasha-fdbc0.appspot.com",
-            messagingSenderId: "11075472828",
-            appId: "1:11075472828:web:ed0a46285d259760f32fb9",
-            measurementId: "G-H49EPQK1PQ"
-        };
+    // Firebase (ONLY DB)
+    const firebaseConfig = {
+        apiKey: "AIzaSyAkxeSRcylugPQdhABCFmWmTUYFQ868aDE",
+        authDomain: "abhilasha-fdbc0.firebaseapp.com",
+        projectId: "abhilasha-fdbc0",
+        storageBucket: "abhilasha-fdbc0.appspot.com",
+        messagingSenderId: "11075472828",
+        appId: "1:11075472828:web:ed0a46285d259760f32fb9",
+        measurementId: "G-H49EPQK1PQ"
+    };
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                const userId = user.uid;
-                const userDocRef = db.collection('users').doc(userId);
+    // ===============================
+    // 🔐 REPLACE FIREBASE AUTH WITH COGNITO
+    // ===============================
+    function parseJwt(token) {
+        return JSON.parse(atob(token.split('.')[1]));
+    }
 
-                // Load existing data on page load
-                userDocRef.get().then(doc => {
-                    if (doc.exists && doc.data().divyangDetails) {
-                        const data = doc.data().divyangDetails;
-                        document.querySelector('select[name="divyang_type"]').value = data.divyang_type || '';
-                        document.getElementById('disability_percentage').value = data.disability_percentage || '';
-                        document.getElementById('certificate_number').value = data.certificate_number || '';
-                        document.getElementById('annual_income').value = data.annual_income || '';
-                    }
-                });
+    const token = localStorage.getItem("idToken");
 
-                // Save form data on submit
-                document.getElementById("divyang-form").addEventListener("submit", function (event) {
-                    event.preventDefault();
+    if (!token) {
+        window.top.location.href = "../../Login/login.html";
+    }
 
-                    const divyang_type = document.querySelector('select[name="divyang_type"]').value;
-                    const disability_percentage = document.getElementById("disability_percentage").value;
-                    const certificate_number = document.getElementById("certificate_number").value;
-                    const annual_income = document.getElementById("annual_income").value;
+    let decoded;
+    try {
+        decoded = parseJwt(token);
 
-                    // Validation
-                    if (disability_percentage < 0 || disability_percentage > 100) {
-                        alert("Percentage of Disability must be between 0 and 100.");
-                        return;
-                    }
+        const now = Math.floor(Date.now() / 1000);
+        if (decoded.exp < now) {
+            localStorage.clear();
+            window.top.location.href = "../../Login/login.html";
+        }
 
-                    if (!/^[a-zA-Z0-9]{18}$/.test(certificate_number)) {
-                        alert("Certificate Number must be exactly 18 alphanumeric characters.");
-                        return;
-                    }
+    } catch (e) {
+        localStorage.clear();
+        window.top.location.href = "../../Login/login.html";
+    }
 
-                    if (!/^\d+$/.test(annual_income)) {
-                        alert("Annual Income must contain only numbers.");
-                        return;
-                    }
+    // ✅ USER ID (REPLACES Firebase UID)
+    const userId = decoded.email;
+    const userDocRef = db.collection('users').doc(userId);
 
-                    // Save to Firestore
-                    userDocRef.set({
-                        divyangDetails: {
-                            divyang_type,
-                            disability_percentage,
-                            certificate_number,
-                            annual_income
-                        }
-                    }, { merge: true }).then(() => {
-                        document.getElementById("divyang-success-message").style.display = "block";
-                        window.parent.postMessage({ section: "divyang", data: { divyang_type } }, "*");
-                        window.parent.postMessage("sectionSaved", "*");
-                    }).catch(error => {
-                        console.error("Error saving data:", error);
-                    });
-                });
+    // ===============================
+    // 📥 LOAD DATA
+    // ===============================
+    userDocRef.get().then(doc => {
+        if (doc.exists && doc.data().divyangDetails) {
+            const data = doc.data().divyangDetails;
 
-                // Input restrictions
-                document.getElementById("annual_income").addEventListener("input", function () {
-                    this.value = this.value.replace(/\D/g, '');
-                });
+            document.querySelector('select[name="divyang_type"]').value = data.divyang_type || '';
+            document.getElementById('disability_percentage').value = data.disability_percentage || '';
+            document.getElementById('certificate_number').value = data.certificate_number || '';
+            document.getElementById('annual_income').value = data.annual_income || '';
+        }
+    });
 
-                document.getElementById("certificate_number").addEventListener("input", function () {
-                    this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 18);
-                });
+    // ===============================
+    // 💾 SAVE DATA
+    // ===============================
+    document.getElementById("divyang-form").addEventListener("submit", function (event) {
+        event.preventDefault();
 
-                document.getElementById("disability_percentage").addEventListener("input", function () {
-                    if (this.value > 100) this.value = 100;
-                    if (this.value < 0) this.value = 0;
-                });
+        const divyang_type = document.querySelector('select[name="divyang_type"]').value;
+        const disability_percentage = document.getElementById("disability_percentage").value;
+        const certificate_number = document.getElementById("certificate_number").value;
+        const annual_income = document.getElementById("annual_income").value;
+
+        // Validation
+        if (disability_percentage < 0 || disability_percentage > 100) {
+            alert("Percentage must be between 0 and 100.");
+            return;
+        }
+
+        if (!/^[a-zA-Z0-9]{18}$/.test(certificate_number)) {
+            alert("Certificate must be 18 characters.");
+            return;
+        }
+
+        if (!/^\d+$/.test(annual_income)) {
+            alert("Income must be numeric.");
+            return;
+        }
+
+        userDocRef.set({
+            divyangDetails: {
+                divyang_type,
+                disability_percentage,
+                certificate_number,
+                annual_income
             }
+        }, { merge: true }).then(() => {
+
+            document.getElementById("divyang-success-message").style.display = "block";
+
+            window.parent.postMessage({ section: "divyang", data: { divyang_type } }, "*");
+            window.parent.postMessage("sectionSaved", "*");
+
+        }).catch(error => {
+            console.error("Error saving data:", error);
         });
-    </script>
+    });
+
+    // ===============================
+    // INPUT RESTRICTIONS
+    // ===============================
+    document.getElementById("annual_income").addEventListener("input", function () {
+        this.value = this.value.replace(/\D/g, '');
+    });
+
+    document.getElementById("certificate_number").addEventListener("input", function () {
+        this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 18);
+    });
+
+    document.getElementById("disability_percentage").addEventListener("input", function () {
+        if (this.value > 100) this.value = 100;
+        if (this.value < 0) this.value = 0;
+    });
+
+</script>
 
 </body>
 

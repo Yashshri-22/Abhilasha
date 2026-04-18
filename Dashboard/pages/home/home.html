@@ -64,12 +64,17 @@
     </div>
 
     <script>
-      const token = JSON.parse(localStorage.getItem("idToken"));
+      const token = localStorage.getItem("idToken");
 
       console.log("Dashboard token:", token);
 
       if (!token) {
         window.location.href = "../Login/login.html";
+      }
+
+      function navigateTo(page) {
+        // Since you're inside iframe
+        window.parent.loadPage(`pages/${page}/${page}.html`);
       }
     </script>
   </body>
