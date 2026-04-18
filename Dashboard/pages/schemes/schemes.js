@@ -111,21 +111,31 @@ function openPDF(pdfFile) {
 }
 // Function to handle apply button click
 async function applyScheme(schemeName) {
-  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-  const currentUserId = currentUser?.uid;
-  if (!currentUserId) {
-    console.error("Error: currentUserId is not set in localStorage.");
-    alert("Please log in to apply for schemes.");
+  // ===============================
+  // 🔐 GET USER
+  // ===============================
+  const token = localStorage.getItem("idToken");
+
+  if (!token) {
+    alert("Please login first");
     return;
   }
 
-  console.log(`Applying for scheme: ${schemeName}, User ID: ${currentUserId}`);
+  let decoded;
+  try {
+    decoded = JSON.parse(atob(token.split(".")[1]));
+  } catch (e) {
+    alert("Session expired");
+    return;
+  }
 
-  const key = `progressData_${currentUserId}`;
+  const userId = decoded.sub;
+
+  // ===============================
+  // PROFILE COMPLETION CHECK
+  // ===============================
+  const key = `progressData_${userId}`;
   const progressData = JSON.parse(localStorage.getItem(key)) || {};
-
-  console.log(`Using progressData key: ${key}`);
-  console.log("Progress Data:", progressData);
 
   const totalSections = [
     "personal",
@@ -135,69 +145,58 @@ async function applyScheme(schemeName) {
     "divyang",
     "question",
   ];
+
   const completedSections = totalSections.filter(
-    (section) => progressData[section],
+    (section) => progressData[section]
   );
+
   const progress = Math.round(
-    (completedSections.length / totalSections.length) * 100,
+    (completedSections.length / totalSections.length) * 100
   );
 
-  console.log(`Profile completion: ${progress}%`);
+  if (progress !== 100) {
+    alert("Please complete your profile 100% before applying.");
+    return;
+  }
 
-  if (progress === 100) {
-    const scheme = schemes.find((s) => s.name === schemeName);
-    if (!scheme) {
-      console.error("Error: Scheme not found.");
-      alert("Scheme not found.");
-      return;
+  // ===============================
+  // FIND SCHEME
+  // ===============================
+  const scheme = schemes.find((s) => s.name === schemeName);
+
+  if (!scheme) {
+    alert("Scheme not found");
+    return;
+  }
+
+  // ===============================
+  // CALL BACKEND
+  // ===============================
+  try {
+    const res = await fetch("http://localhost:3000/applyScheme", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId,
+        scheme: {
+          id: scheme.id,
+        },
+      }),
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      alert(`✅ Applied successfully for "${schemeName}"`);
+    } else {
+      alert(result.message);
     }
 
-    try {
-      const userDocRef = doc(db, "users", currentUserId);
-      const userDocSnap = await getDoc(userDocRef);
-
-      if (!userDocSnap.exists()) {
-        console.error("Error: User document not found in Firestore.");
-        alert("User data not found. Please try again.");
-        return;
-      }
-
-      const userData = userDocSnap.data();
-      const appliedSchemes = userData.appliedSchemes || [];
-
-      // Check if the user has already applied for this scheme
-      if (appliedSchemes.some((s) => s.id === scheme.id)) {
-        alert(`You have already applied for the "${schemeName}" scheme.`);
-        return;
-      }
-
-      // Check if the user has already applied for the maximum number of schemes
-      if (appliedSchemes.length >= 4) {
-        alert("You can apply for a maximum of 4 schemes.");
-        return;
-      }
-
-      const newScheme = {
-        id: scheme.id,
-        appliedDate: new Date().toISOString(),
-      };
-
-      console.log("Updating Firestore with new scheme:", newScheme);
-
-      // Update Firestore with the new scheme
-      await updateDoc(userDocRef, {
-        appliedSchemes: arrayUnion(newScheme),
-      });
-
-      alert(`You have successfully applied for the "${schemeName}" scheme.`);
-    } catch (error) {
-      console.error("Error applying for scheme:", error);
-      alert(
-        "An error occurred while applying for the scheme. Please try again.",
-      );
-    }
-  } else {
-    alert("Please complete your profile 100% before applying for a scheme.");
+  } catch (err) {
+    console.error(err);
+    alert("Error applying for scheme");
   }
 }
 window.applyScheme = applyScheme;

@@ -53,7 +53,7 @@ try {
 }
 
 // ✅ USER IDENTIFICATION (Cognito)
-const currentUserId = decoded.email;
+const currentUserId = decoded.sub;
 
 // ✅ UNIQUE STORAGE KEY PER USER
 const key = `progressData_${currentUserId}`;

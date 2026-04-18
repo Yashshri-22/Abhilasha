@@ -169,6 +169,93 @@ app.post("/saveEmployment", async (req, res) => {
 });
 
 // ===============================
+// 📤 UPDATE SCHEMES
+// ===============================
+app.post("/updateSchemes", async (req, res) => {
+  try {
+    const { userId, appliedSchemes, cancelledSchemes } = req.body;
+
+    const params = {
+      TableName: "users",
+      Key: { userId },
+      UpdateExpression:
+        "SET appliedSchemes = :a, cancelledSchemes = :c",
+      ExpressionAttributeValues: {
+        ":a": appliedSchemes,
+        ":c": cancelledSchemes,
+      },
+    };
+
+    await dynamo.update(params).promise();
+
+    res.send({ success: true });
+  } catch (err) {
+    console.error("Scheme Update Error:", err);
+    res.status(500).send({ error: "Failed to update schemes" });
+  }
+});
+
+// ===============================
+// 📤 APPLY SCHEME
+// ===============================
+app.post("/applyScheme", async (req, res) => {
+  try {
+    const { userId, scheme } = req.body;
+
+    // Get existing user
+    const getParams = {
+      TableName: "users",
+      Key: { userId },
+    };
+
+    const user = await dynamo.get(getParams).promise();
+    const appliedSchemes = user.Item?.appliedSchemes || [];
+
+    // Check duplicate
+    if (appliedSchemes.some(s => s.id === scheme.id)) {
+      return res.send({ success: false, message: "Already applied" });
+    }
+
+    // Max 4 schemes
+    if (appliedSchemes.length >= 4) {
+      return res.send({ success: false, message: "Limit reached" });
+    }
+
+    const updatedSchemes = [
+      ...appliedSchemes,
+      {
+        id: scheme.id,
+        appliedDate: new Date().toISOString(),
+        status: [
+          {
+            remark: "Application Submitted",
+            sentBy: "System",
+            date: new Date().toISOString(),
+          },
+        ],
+      },
+    ];
+
+    const updateParams = {
+      TableName: "users",
+      Key: { userId },
+      UpdateExpression: "SET appliedSchemes = :a",
+      ExpressionAttributeValues: {
+        ":a": updatedSchemes,
+      },
+    };
+
+    await dynamo.update(updateParams).promise();
+
+    res.send({ success: true });
+
+  } catch (err) {
+    console.error("Apply Error:", err);
+    res.status(500).send({ error: "Failed to apply scheme" });
+  }
+});
+
+// ===============================
 // 🟢 START SERVER
 // ===============================
 const PORT = 3000;
