@@ -185,7 +185,7 @@ function loginUser(email, password) {
       localStorage.setItem("idToken", idToken);
       localStorage.setItem("accessToken", accessToken);
 
-      alert("Login successful 🚀");
+      alert("Login successful");
 
       // redirect to dashboard
       setTimeout(() => {
