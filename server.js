@@ -178,8 +178,7 @@ app.post("/updateSchemes", async (req, res) => {
     const params = {
       TableName: "users",
       Key: { userId },
-      UpdateExpression:
-        "SET appliedSchemes = :a, cancelledSchemes = :c",
+      UpdateExpression: "SET appliedSchemes = :a, cancelledSchemes = :c",
       ExpressionAttributeValues: {
         ":a": appliedSchemes,
         ":c": cancelledSchemes,
@@ -212,7 +211,7 @@ app.post("/applyScheme", async (req, res) => {
     const appliedSchemes = user.Item?.appliedSchemes || [];
 
     // Check duplicate
-    if (appliedSchemes.some(s => s.id === scheme.id)) {
+    if (appliedSchemes.some((s) => s.id === scheme.id)) {
       return res.send({ success: false, message: "Already applied" });
     }
 
@@ -248,10 +247,97 @@ app.post("/applyScheme", async (req, res) => {
     await dynamo.update(updateParams).promise();
 
     res.send({ success: true });
-
   } catch (err) {
     console.error("Apply Error:", err);
     res.status(500).send({ error: "Failed to apply scheme" });
+  }
+});
+
+// ===============================
+// 🔐 ADMIN LOGIN (COGNITO)
+// ===============================
+const AmazonCognitoIdentity = require("amazon-cognito-identity-js");
+
+app.post("/loginAdmin", (req, res) => {
+  const { email, password } = req.body;
+
+  const poolData = {
+    UserPoolId: "eu-north-1_helCUhBlp",
+    ClientId: "mhpn6e3ip48mpua0chl7a2or3",
+  };
+
+  const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+
+  const authDetails = new AmazonCognitoIdentity.AuthenticationDetails({
+    Username: email,
+    Password: password,
+  });
+
+  const userData = {
+    Username: email,
+    Pool: userPool,
+  };
+
+  const cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+
+  cognitoUser.authenticateUser(authDetails, {
+    onSuccess: (result) => {
+      res.send({
+        success: true,
+        idToken: result.getIdToken().getJwtToken(),
+      });
+    },
+
+    onFailure: (err) => {
+      res.send({
+        success: false,
+        message: err.message,
+      });
+    },
+
+    // 🔥 ADD THIS BLOCK (VERY IMPORTANT)
+    newPasswordRequired: function (userAttributes, requiredAttributes) {
+      // remove unnecessary attributes
+      delete userAttributes.email_verified;
+
+      cognitoUser.completeNewPasswordChallenge(
+        password, // reuse same password
+        {},
+        {
+          onSuccess: function (result) {
+            res.send({
+              success: true,
+              idToken: result.getIdToken().getJwtToken(),
+            });
+          },
+
+          onFailure: function (err) {
+            res.send({
+              success: false,
+              message: err.message,
+            });
+          },
+        },
+      );
+    },
+  });
+});
+
+// ===============================
+// 📥 GET ALL USERS
+// ===============================
+app.get("/getAllUsers", async (req, res) => {
+  try {
+    const params = {
+      TableName: "users",
+    };
+
+    const data = await dynamo.scan(params).promise();
+
+    res.send(data.Items || []);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: "Failed to fetch users" });
   }
 });
 

@@ -1,47 +1,48 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+// ===============================
+// 🔐 ADMIN AUTH CHECK (COGNITO)
+// ===============================
+async function checkAdminAccess() {
+  const token = localStorage.getItem("idToken");
 
-// Firebase config
-const firebaseConfig = {
-    apiKey: "AIzaSyAkxeSRcylugPQdhABCFmWmTUYFQ868aDE",
-    authDomain: "abhilasha-fdbc0.firebaseapp.com",
-    projectId: "abhilasha-fdbc0",
-    storageBucket: "abhilasha-fdbc0.firebasestorage.app",
-    messagingSenderId: "11075472828",
-    appId: "1:11075472828:web:ed0a46285d259760f32fb9",
-    measurementId: "G-H49EPQK1PQ"
-};
+  if (!token) {
+    window.location.href = "../home/home.html";
+    return;
+  }
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+  try {
+    const decoded = JSON.parse(atob(token.split(".")[1]));
+    const userId = decoded.sub;
 
-// 🔄 Modular syntax for auth state check
-onAuthStateChanged(auth, (user) => {
-    if (!user) {
-        window.location.href = "../home/home.html"; // Redirect if not logged in
+    const res = await fetch(`http://localhost:3000/getUser/${userId}`);
+    const userData = await res.json();
+
+    console.log("Admin check:", userData);
+
+    if (userData.role !== "admin") {
+      window.location.href = "../home/home.html";
     }
-});
 
-// ✅ Modular logout
-function loadPage(pageUrl) {
-    console.log(`loadPage called with URL: ${pageUrl}`); // Debug log
-    if (pageUrl === "pages/Logout/Logout.html") {
-        signOut(auth)
-            .then(() => {
-                console.log("Admin signed out.");
-                window.location.href = "../home/home.html"; // Redirect
-            })
-            .catch((error) => {
-                console.error("Error signing out: ", error);
-            });
-    } else {
-        document.getElementById("mainFrame").src = pageUrl;
-    }
+  } catch (err) {
+    console.error(err);
+    window.location.href = "../home/home.html";
+  }
 }
 
-// Attach to window for global access
+// run on page load
+document.addEventListener("DOMContentLoaded", checkAdminAccess);
+
+// ===============================
+// 🚪 LOGOUT
+// ===============================
+function loadPage(pageUrl) {
+  if (pageUrl === "pages/Logout/Logout.html") {
+    localStorage.removeItem("idToken"); // 🔥 clear token
+    window.location.href = "../home/home.html";
+  } else {
+    document.getElementById("mainFrame").src = pageUrl;
+  }
+}
+
 window.loadPage = loadPage;
 
-console.log("Admin Dashboard script loaded successfully."); // Debug log
+console.log("Admin Dashboard loaded (Cognito version)");
