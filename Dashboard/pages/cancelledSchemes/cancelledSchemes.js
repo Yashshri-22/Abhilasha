@@ -47,7 +47,7 @@ async function loadCancelledSchemes() {
   if (!userId) return;
 
   try {
-    const res = await fetch(`http://localhost:3000/getUser/${userId}`);
+    const res = await fetch(`http://13.61.14.149:3000/getUser/${userId}`);
     const data = await res.json();
 
     const cancelledSchemes = data.cancelledSchemes || [];

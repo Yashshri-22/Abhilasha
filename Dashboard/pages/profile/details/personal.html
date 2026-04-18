@@ -340,7 +340,7 @@
     const uid = decoded.sub; // ✅ FIXED (Cognito ID)
 
     try {
-      const res = await fetch(`http://localhost:3000/getUser/${uid}`);
+      const res = await fetch(`http://13.61.14.149:3000/getUser/${uid}`);
       const user = await res.json();
 
       if (user && user.personalDetails) {
@@ -394,7 +394,7 @@
       }
 
       try {
-        await fetch("http://localhost:3000/savePersonal", {
+        await fetch("http://13.61.14.149:3000/savePersonal", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

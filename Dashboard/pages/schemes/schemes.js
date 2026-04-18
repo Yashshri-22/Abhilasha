@@ -173,7 +173,7 @@ async function applyScheme(schemeName) {
   // CALL BACKEND
   // ===============================
   try {
-    const res = await fetch("http://localhost:3000/applyScheme", {
+    const res = await fetch("http://13.61.14.149:3000/applyScheme", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
