@@ -1,42 +1,65 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Register - Abhilasha-Divyang Scholarship Portal</title>
-    <link rel="shortcut icon" href="../Assets/logo.jpg" type="image/x-icon">
-    <link rel="stylesheet" href="styles.css">
-</head>
+    <link rel="shortcut icon" href="../Assets/logo.jpg" type="image/x-icon" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
 
-<body>
+  <body>
     <div class="wrapper">
-        <!-- Left Side with Background Image -->
-        <div class="left-side"></div>
+      <!-- Left Side with Background Image -->
+      <div class="left-side"></div>
 
-        <!-- Right Side with Form -->
-        <div class="right-side">
-            <div class="register-box">
-                <h2>New User Registration</h2>
-                <form id="register-section" autocomplete="off">
-                    <!-- <input type="text" class="field" id="full-name" placeholder="Enter Full Name" required> -->
+      <!-- Right Side with Form -->
+      <div class="right-side">
+        <div class="register-box">
+          <h2>New User Registration</h2>
+          <form id="register-section" autocomplete="off">
+            <!-- <input type="text" class="field" id="full-name" placeholder="Enter Full Name" required> -->
 
-                    <input type="email" class="field" id="email" placeholder="Enter Email" required>
-                    <input type="password" class="field" id="password" placeholder="Enter Password" required>
-                    <input type="password" class="field" id="confirm-password" placeholder="Confirm Password" required>
+            <input
+              type="email"
+              class="field"
+              id="email"
+              placeholder="Enter Email"
+              required
+            />
+            <input
+              type="password"
+              class="field"
+              id="password"
+              placeholder="Enter Password"
+              required
+            />
+            <input
+              type="password"
+              class="field"
+              id="confirm-password"
+              placeholder="Confirm Password"
+              required
+            />
 
-                    <p class="error-message" id="form-error"></p>
-                    <button type="submit" id="registerButton" class="btn">Register</button>
-                </form>
+            <p class="error-message" id="form-error"></p>
+            <button type="submit" id="registerButton" class="btn">
+              Register
+            </button>
+          </form>
 
-                <div class="extra-options">
-                    <p>Already have an account? <a href="../Login/login.html">Login Here</a></p>
-                </div>
-            </div>
+          <div class="extra-options">
+            <p>
+              Already have an account?
+              <a href="../Login/login.html">Login Here</a>
+            </p>
+          </div>
         </div>
+      </div>
     </div>
-
-    <script src="register.js" type="module"></script>
-</body>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aws-sdk/2.1485.0/aws-sdk.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.3/dist/amazon-cognito-identity.min.js"></script>
+    <!-- There was a type = "module" here (removing it for cognito to work) -->
+    <script src="register.js"></script>
+  </body>
 </html>
