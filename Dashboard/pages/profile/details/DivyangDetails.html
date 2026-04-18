@@ -1,258 +1,316 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Divyang Details</title>
-    <link rel="shortcut icon" href="../Assets/logo.jpg" type="image/x-icon">
+    <link rel="shortcut icon" href="../Assets/logo.jpg" type="image/x-icon" />
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f7f9;
-            text-align: center;
-            font-size: 16px;
-            font-weight: bold;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        background: #f4f7f9;
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+      }
 
-        .container {
-            width: 95%;
-            margin: 50px auto;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            background: white;
-            position: relative;
-        }
+      .container {
+        width: 95%;
+        margin: 50px auto;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        background: white;
+        position: relative;
+      }
 
-        form label {
-            display: block;
-            margin-top: 15px;
-            text-align: left;
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-        }
+      form label {
+        display: block;
+        margin-top: 15px;
+        text-align: left;
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+      }
 
-        input,
-        select {
-            width: 95%;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 5px;
-            border: 2px solid #939393;
-            font-size: 16px;
-        }
+      input,
+      select {
+        width: 95%;
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 5px;
+        border: 2px solid #939393;
+        font-size: 16px;
+      }
 
-        select {
-            width: 98%;
-        }
+      select {
+        width: 98%;
+      }
 
-        button {
-            background-color: #e67e22;
-            color: white;
-            padding: 8px 12px;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            border-radius: 5px;
-            display: block;
-            margin: 20px auto;
-        }
+      button {
+        background-color: #e67e22;
+        color: white;
+        padding: 8px 12px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        border-radius: 5px;
+        display: block;
+        margin: 20px auto;
+      }
 
-        button:hover {
-            background: #ff7700;
-        }
+      button:hover {
+        background: #ff7700;
+      }
 
-        .message {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 5px;
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
+      .message {
+        display: none;
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 5px;
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="container">
-        <form id="divyang-form">
-            <label>Divyang Type:
-                <select name="divyang_type" required>
-                    <option value="">Select Disability Type</option>
-                    <option value="Blindness">Blindness</option>
-                    <option value="Low-vision">Low-vision</option>
-                    <option value="Leprosy Cured Persons">Leprosy Cured Persons</option>
-                    <option value="Hearing Impairment">Hearing Impairment</option>
-                    <option value="Locomotor Disability">Locomotor Disability</option>
-                    <option value="Dwarfism">Dwarfism</option>
-                    <option value="Intellectual Disability">Intellectual Disability</option>
-                    <option value="Mental Illness">Mental Illness</option>
-                    <option value="Autism Spectrum Disorder">Autism Spectrum Disorder</option>
-                    <option value="Cerebral Palsy">Cerebral Palsy</option>
-                    <option value="Muscular Dystrophy">Muscular Dystrophy</option>
-                    <option value="Chronic Neurological Conditions">Chronic Neurological Conditions</option>
-                    <option value="Specific Learning Disabilities">Specific Learning Disabilities</option>
-                    <option value="Multiple Sclerosis">Multiple Sclerosis</option>
-                    <option value="Speech and Language Disability">Speech and Language Disability</option>
-                    <option value="Thalassemia">Thalassemia</option>
-                    <option value="Hemophilia">Hemophilia</option>
-                    <option value="Sickle Cell Disease">Sickle Cell Disease</option>
-                    <option value="Multiple Disabilities">Multiple Disabilities</option>
-                    <option value="Acid Attack Victim">Acid Attack Victim</option>
-                    <option value="Parkinson's Disease">Parkinson's Disease</option>
-                </select>
-            </label>
+      <form id="divyang-form">
+        <label
+          >Divyang Type:
+          <select name="divyang_type" required>
+            <option value="">Select Disability Type</option>
+            <option value="Blindness">Blindness</option>
+            <option value="Low-vision">Low-vision</option>
+            <option value="Leprosy Cured Persons">Leprosy Cured Persons</option>
+            <option value="Hearing Impairment">Hearing Impairment</option>
+            <option value="Locomotor Disability">Locomotor Disability</option>
+            <option value="Dwarfism">Dwarfism</option>
+            <option value="Intellectual Disability">
+              Intellectual Disability
+            </option>
+            <option value="Mental Illness">Mental Illness</option>
+            <option value="Autism Spectrum Disorder">
+              Autism Spectrum Disorder
+            </option>
+            <option value="Cerebral Palsy">Cerebral Palsy</option>
+            <option value="Muscular Dystrophy">Muscular Dystrophy</option>
+            <option value="Chronic Neurological Conditions">
+              Chronic Neurological Conditions
+            </option>
+            <option value="Specific Learning Disabilities">
+              Specific Learning Disabilities
+            </option>
+            <option value="Multiple Sclerosis">Multiple Sclerosis</option>
+            <option value="Speech and Language Disability">
+              Speech and Language Disability
+            </option>
+            <option value="Thalassemia">Thalassemia</option>
+            <option value="Hemophilia">Hemophilia</option>
+            <option value="Sickle Cell Disease">Sickle Cell Disease</option>
+            <option value="Multiple Disabilities">Multiple Disabilities</option>
+            <option value="Acid Attack Victim">Acid Attack Victim</option>
+            <option value="Parkinson's Disease">Parkinson's Disease</option>
+          </select>
+        </label>
 
-            <label>Percentage of Disability:
-                <input type="number" id="disability_percentage" name="disability_percentage"
-                    placeholder="Enter Percentage" required min="0" max="100">
-            </label>
+        <label
+          >Percentage of Disability:
+          <input
+            type="number"
+            id="disability_percentage"
+            name="disability_percentage"
+            placeholder="Enter Percentage"
+            required
+            min="0"
+            max="100"
+          />
+        </label>
 
-            <label>Certificate Number:
-                <input type="text" id="certificate_number" name="certificate_number"
-                    placeholder="Enter Certificate Number" required maxlength="18" minlength="18">
-            </label>
+        <label
+          >Certificate Number:
+          <input
+            type="text"
+            id="certificate_number"
+            name="certificate_number"
+            placeholder="Enter Certificate Number"
+            required
+            maxlength="18"
+            minlength="18"
+          />
+        </label>
 
-            <label>Annual Income:
-                <input type="text" id="annual_income" name="annual_income" placeholder="Enter Annual Income" required>
-            </label>
+        <label
+          >Annual Income:
+          <input
+            type="text"
+            id="annual_income"
+            name="annual_income"
+            placeholder="Enter Annual Income"
+            required
+          />
+        </label>
 
-            <button id="save-btn" type="submit">Save</button>
-        </form>
-        <div class="message" id="divyang-success-message">Divyang details submitted successfully.</div>
+        <button id="save-btn" type="submit">Save</button>
+      </form>
+      <div class="message" id="divyang-success-message">
+        Divyang details submitted successfully.
+      </div>
     </div>
 
     <script>
-    // Firebase (ONLY DB)
-    const firebaseConfig = {
-        apiKey: "AIzaSyAkxeSRcylugPQdhABCFmWmTUYFQ868aDE",
-        authDomain: "abhilasha-fdbc0.firebaseapp.com",
-        projectId: "abhilasha-fdbc0",
-        storageBucket: "abhilasha-fdbc0.appspot.com",
-        messagingSenderId: "11075472828",
-        appId: "1:11075472828:web:ed0a46285d259760f32fb9",
-        measurementId: "G-H49EPQK1PQ"
-    };
+      // ===============================
+      // 🔐 AUTH CHECK
+      // ===============================
+      function parseJwt(token) {
+        return JSON.parse(atob(token.split(".")[1]));
+      }
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+      const token = localStorage.getItem("idToken");
 
-    // ===============================
-    // 🔐 REPLACE FIREBASE AUTH WITH COGNITO
-    // ===============================
-    function parseJwt(token) {
-        return JSON.parse(atob(token.split('.')[1]));
-    }
-
-    const token = localStorage.getItem("idToken");
-
-    if (!token) {
+      if (!token) {
         window.top.location.href = "../../Login/login.html";
-    }
+      }
 
-    let decoded;
-    try {
+      let decoded;
+      try {
         decoded = parseJwt(token);
 
         const now = Math.floor(Date.now() / 1000);
         if (decoded.exp < now) {
-            localStorage.clear();
-            window.top.location.href = "../../Login/login.html";
+          localStorage.clear();
+          window.top.location.href = "../../Login/login.html";
         }
-
-    } catch (e) {
+      } catch (e) {
         localStorage.clear();
         window.top.location.href = "../../Login/login.html";
-    }
+      }
 
-    // ✅ USER ID (REPLACES Firebase UID)
-    const userId = decoded.email;
-    const userDocRef = db.collection('users').doc(userId);
+      const userId = decoded.sub; // ✅ IMPORTANT
 
-    // ===============================
-    // 📥 LOAD DATA
-    // ===============================
-    userDocRef.get().then(doc => {
-        if (doc.exists && doc.data().divyangDetails) {
-            const data = doc.data().divyangDetails;
+      // ===============================
+      // 📥 LOAD DATA FROM DYNAMO
+      // ===============================
+      async function loadDivyangData() {
+        try {
+          const res = await fetch(`http://localhost:3000/getUser/${userId}`);
+          const data = await res.json();
 
-            document.querySelector('select[name="divyang_type"]').value = data.divyang_type || '';
-            document.getElementById('disability_percentage').value = data.disability_percentage || '';
-            document.getElementById('certificate_number').value = data.certificate_number || '';
-            document.getElementById('annual_income').value = data.annual_income || '';
+          if (data.divyangDetails) {
+            document.querySelector('select[name="divyang_type"]').value =
+              data.divyangDetails.divyang_type || "";
+
+            document.getElementById("disability_percentage").value =
+              data.divyangDetails.disability_percentage || "";
+
+            document.getElementById("certificate_number").value =
+              data.divyangDetails.certificate_number || "";
+
+            document.getElementById("annual_income").value =
+              data.divyangDetails.annual_income || "";
+          }
+        } catch (err) {
+          console.error("Load Error:", err);
         }
-    });
+      }
 
-    // ===============================
-    // 💾 SAVE DATA
-    // ===============================
-    document.getElementById("divyang-form").addEventListener("submit", function (event) {
-        event.preventDefault();
+      // ===============================
+      // 💾 SAVE DATA TO DYNAMO
+      // ===============================
+      document
+        .getElementById("divyang-form")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
 
-        const divyang_type = document.querySelector('select[name="divyang_type"]').value;
-        const disability_percentage = document.getElementById("disability_percentage").value;
-        const certificate_number = document.getElementById("certificate_number").value;
-        const annual_income = document.getElementById("annual_income").value;
+          const divyang_type = document.querySelector(
+            'select[name="divyang_type"]',
+          ).value;
+          const disability_percentage = document.getElementById(
+            "disability_percentage",
+          ).value;
+          const certificate_number =
+            document.getElementById("certificate_number").value;
+          const annual_income = document.getElementById("annual_income").value;
 
-        // Validation
-        if (disability_percentage < 0 || disability_percentage > 100) {
+          // VALIDATION
+          if (disability_percentage < 0 || disability_percentage > 100) {
             alert("Percentage must be between 0 and 100.");
             return;
-        }
+          }
 
-        if (!/^[a-zA-Z0-9]{18}$/.test(certificate_number)) {
+          if (!/^[a-zA-Z0-9]{18}$/.test(certificate_number)) {
             alert("Certificate must be 18 characters.");
             return;
-        }
+          }
 
-        if (!/^\d+$/.test(annual_income)) {
+          if (!/^\d+$/.test(annual_income)) {
             alert("Income must be numeric.");
             return;
-        }
+          }
 
-        userDocRef.set({
-            divyangDetails: {
-                divyang_type,
-                disability_percentage,
-                certificate_number,
-                annual_income
+          try {
+            const res = await fetch("http://localhost:3000/saveDivyang", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                data: {
+                  divyang_type,
+                  disability_percentage,
+                  certificate_number,
+                  annual_income,
+                },
+              }),
+            });
+
+            const result = await res.json();
+
+            if (result.success) {
+              document.getElementById("divyang-success-message").style.display =
+                "block";
+
+              window.parent.postMessage({ section: "divyang" }, "*");
+              window.parent.postMessage("sectionSaved", "*");
             }
-        }, { merge: true }).then(() => {
-
-            document.getElementById("divyang-success-message").style.display = "block";
-
-            window.parent.postMessage({ section: "divyang", data: { divyang_type } }, "*");
-            window.parent.postMessage("sectionSaved", "*");
-
-        }).catch(error => {
-            console.error("Error saving data:", error);
+          } catch (err) {
+            console.error("Save Error:", err);
+            alert("Failed to save divyang details");
+          }
         });
-    });
 
-    // ===============================
-    // INPUT RESTRICTIONS
-    // ===============================
-    document.getElementById("annual_income").addEventListener("input", function () {
-        this.value = this.value.replace(/\D/g, '');
-    });
+      // ===============================
+      // INPUT RESTRICTIONS
+      // ===============================
+      document
+        .getElementById("annual_income")
+        .addEventListener("input", function () {
+          this.value = this.value.replace(/\D/g, "");
+        });
 
-    document.getElementById("certificate_number").addEventListener("input", function () {
-        this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 18);
-    });
+      document
+        .getElementById("certificate_number")
+        .addEventListener("input", function () {
+          this.value = this.value.replace(/[^a-zA-Z0-9]/g, "").slice(0, 18);
+        });
 
-    document.getElementById("disability_percentage").addEventListener("input", function () {
-        if (this.value > 100) this.value = 100;
-        if (this.value < 0) this.value = 0;
-    });
+      document
+        .getElementById("disability_percentage")
+        .addEventListener("input", function () {
+          if (this.value > 100) this.value = 100;
+          if (this.value < 0) this.value = 0;
+        });
 
-</script>
-
-</body>
-
+      // ===============================
+      // 🚀 INIT
+      // ===============================
+      document.addEventListener("DOMContentLoaded", loadDivyangData);
+    </script>
+  </body>
 </html>

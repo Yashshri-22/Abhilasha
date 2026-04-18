@@ -126,26 +126,43 @@
     </div>
 
     <script>
-      // Firebase config
-      const firebaseConfig = {
-        apiKey: "AIzaSyAkxeSRcylugPQdhABCFmWmTUYFQ868aDE",
-        authDomain: "abhilasha-fdbc0.firebaseapp.com",
-        projectId: "abhilasha-fdbc0",
-        storageBucket: "abhilasha-fdbc0.appspot.com",
-        messagingSenderId: "11075472828",
-        appId: "1:11075472828:web:ed0a46285d259760f32fb9",
-        measurementId: "G-H49EPQK1PQ",
-      };
+      // ===============================
+      // 🔐 AUTH
+      // ===============================
+      function parseJwt(token) {
+        return JSON.parse(atob(token.split(".")[1]));
+      }
 
-      firebase.initializeApp(firebaseConfig);
-      const auth = firebase.auth();
-      const db = firebase.firestore();
+      const token = localStorage.getItem("idToken");
 
-      // Enable/disable occupation input
+      if (!token) {
+        window.top.location.href = "../../Login/login.html";
+      }
+
+      let decoded;
+      try {
+        decoded = parseJwt(token);
+
+        const now = Math.floor(Date.now() / 1000);
+        if (decoded.exp < now) {
+          localStorage.clear();
+          window.top.location.href = "../../Login/login.html";
+        }
+      } catch (e) {
+        localStorage.clear();
+        window.top.location.href = "../../Login/login.html";
+      }
+
+      const userId = decoded.sub; // ✅ FIXED
+
+      // ===============================
+      // ENABLE/DISABLE OCCUPATION
+      // ===============================
       document
         .getElementById("employment_status")
         .addEventListener("change", function () {
           const occupationField = document.getElementById("occupation");
+
           if (this.value === "yes") {
             occupationField.disabled = false;
           } else {
@@ -155,66 +172,50 @@
         });
 
       // ===============================
-      // 🔐 COGNITO AUTH (REPLACEMENT)
+      // 📥 LOAD DATA (DYNAMO)
       // ===============================
-      function getUserId() {
-        const token = localStorage.getItem("idToken");
-
-        if (!token) {
-          window.top.location.href = "../../Login/login.html";
-          return null;
-        }
-
+      async function loadEmploymentData() {
         try {
-          const decoded = JSON.parse(atob(token.split(".")[1]));
-          return decoded.email;
-        } catch (e) {
-          window.top.location.href = "../../Login/login.html";
-          return null;
-        }
-      }
+          const res = await fetch(`http://localhost:3000/getUser/${userId}`);
+          const data = await res.json();
 
-      // ===============================
-      // 📥 LOAD DATA
-      // ===============================
-      async function loadData() {
-        const uid = getUserId();
-        if (!uid) return;
-
-        const docRef = db.collection("users").doc(uid);
-        const docSnap = await docRef.get();
-
-        if (docSnap.exists) {
-          const data = docSnap.data().employmentDetails;
-          if (data) {
+          if (data.employmentDetails) {
             document.getElementById("employment_status").value =
-              data.employment_status || "";
-            document.getElementById("occupation").value = data.occupation || "";
+              data.employmentDetails.employment_status || "";
+
+            document.getElementById("occupation").value =
+              data.employmentDetails.occupation || "";
+
             document.getElementById("occupation").disabled =
-              data.employment_status !== "yes";
+              data.employmentDetails.employment_status !== "yes";
           }
+        } catch (err) {
+          console.error("Load Error:", err);
         }
       }
 
-      loadData();
-
       // ===============================
-      // 💾 SAVE DATA
+      // 💾 SAVE DATA (DYNAMO)
       // ===============================
       document
         .getElementById("employment-form")
         .addEventListener("submit", async function (event) {
           event.preventDefault();
+
           document.getElementById("employment-success-message").style.display =
             "none";
 
           let isValid = true;
+
           const employmentStatus =
             document.getElementById("employment_status").value;
+
           const occupation = document.getElementById("occupation").value.trim();
+
           const employmentError = document.getElementById("employment-error");
           const occupationError = document.getElementById("occupation-error");
 
+          // VALIDATION
           if (employmentStatus === "") {
             employmentError.textContent =
               "Please select your employment status.";
@@ -230,44 +231,50 @@
             occupationError.textContent = "";
           }
 
-          if (isValid) {
-            const uid = getUserId();
-            if (!uid) return;
+          if (!isValid) return;
 
-            await db
-              .collection("users")
-              .doc(uid)
-              .set(
-                {
-                  employmentDetails: {
-                    employment_status: employmentStatus,
-                    occupation: occupation,
-                  },
+          try {
+            const res = await fetch("http://localhost:3000/saveEmployment", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                data: {
+                  employment_status: employmentStatus,
+                  occupation: occupation,
                 },
-                { merge: true },
+              }),
+            });
+
+            const result = await res.json();
+
+            if (result.success) {
+              document.getElementById(
+                "employment-success-message",
+              ).style.display = "block";
+
+              window.parent.postMessage(
+                {
+                  section: "question",
+                  data: { employment_status: employmentStatus },
+                },
+                "*",
               );
 
-            document.getElementById(
-              "employment-success-message",
-            ).style.display = "block";
-
-            // Send message to parent
-            window.parent.postMessage(
-              {
-                section: "question",
-                data: { employment_status: employmentStatus },
-              },
-              "*",
-            );
+              window.parent.postMessage("sectionSaved", "*");
+            }
+          } catch (err) {
+            console.error("Save Error:", err);
+            alert("Failed to save employment details");
           }
         });
 
-      // Let parent iframe know section is saved
-      document
-        .getElementById("save-btn")
-        .addEventListener("click", function () {
-          window.parent.postMessage("sectionSaved", "*");
-        });
+      // ===============================
+      // 🚀 INIT
+      // ===============================
+      document.addEventListener("DOMContentLoaded", loadEmploymentData);
     </script>
   </body>
 </html>

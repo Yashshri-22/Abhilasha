@@ -299,102 +299,127 @@
 
     <script>
   function previewPhoto(event) {
-      const file = event.target.files[0];
-      if (file) {
-          const reader = new FileReader();
-          reader.onload = function (e) {
-              document.getElementById('profile-preview').src = e.target.result;
-          }
-          reader.readAsDataURL(file);
-      }
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        document.getElementById("profile-preview").src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   // Restrict numeric-only fields
-  document.querySelectorAll("input[type='text']").forEach(input => {
-      input.addEventListener("input", function () {
-          if (["pin_code", "aadhar", "phone", "alt_phone"].includes(this.name)) {
-              this.value = this.value.replace(/\D/g, '');
-          }
-      });
+  document.querySelectorAll("input[type='text']").forEach((input) => {
+    input.addEventListener("input", function () {
+      if (["pin_code", "aadhar", "phone", "alt_phone"].includes(this.name)) {
+        this.value = this.value.replace(/\D/g, "");
+      }
+    });
   });
 
-  // Populate form with data from Firestore
+  // ===============================
+  // 📥 LOAD DATA FROM DYNAMODB
+  // ===============================
   async function loadData() {
+    const token = localStorage.getItem("idToken");
 
-      const token = localStorage.getItem("idToken");
+    if (!token) {
+      window.top.location.href = "../../Login/login.html";
+      return;
+    }
 
-      if (!token) {
-          window.top.location.href = "../../Login/login.html";
-          return;
-      }
+    let decoded;
+    try {
+      decoded = JSON.parse(atob(token.split(".")[1]));
+    } catch (e) {
+      window.top.location.href = "../../Login/login.html";
+      return;
+    }
 
-      let decoded;
-      try {
-          decoded = JSON.parse(atob(token.split('.')[1]));
-      } catch (e) {
-          window.top.location.href = "../../Login/login.html";
-          return;
-      }
+    const uid = decoded.sub; // ✅ FIXED (Cognito ID)
 
-      const uid = decoded.email;
-      const docRef = db.collection("users").doc(uid);
-      const docSnap = await docRef.get();
+    try {
+      const res = await fetch(`http://localhost:3000/getUser/${uid}`);
+      const user = await res.json();
 
-      if (docSnap.exists) {
-          const data = docSnap.data().personalDetails;
-          if (data) {
-              for (let key in data) {
-                  if (document.querySelector(`[name="${key}"]`)) {
-                      document.querySelector(`[name="${key}"]`).value = data[key];
-                  }
-              }
+      if (user && user.personalDetails) {
+        const data = user.personalDetails;
+
+        for (let key in data) {
+          if (document.querySelector(`[name="${key}"]`)) {
+            document.querySelector(`[name="${key}"]`).value = data[key];
           }
+        }
       }
+    } catch (err) {
+      console.error("Error loading data:", err);
+    }
   }
 
   loadData();
 
-  // Handle form submit
-  document.getElementById("personal-form").addEventListener("submit", async function (event) {
+  // ===============================
+  // 📤 SAVE DATA TO DYNAMODB
+  // ===============================
+  document
+    .getElementById("personal-form")
+    .addEventListener("submit", async function (event) {
       event.preventDefault();
 
       const token = localStorage.getItem("idToken");
 
       if (!token) {
-          window.top.location.href = "../../Login/login.html";
-          return;
+        window.top.location.href = "../../Login/login.html";
+        return;
       }
 
       let decoded;
       try {
-          decoded = JSON.parse(atob(token.split('.')[1]));
+        decoded = JSON.parse(atob(token.split(".")[1]));
       } catch (e) {
-          window.top.location.href = "../../Login/login.html";
-          return;
+        window.top.location.href = "../../Login/login.html";
+        return;
       }
 
-      const uid = decoded.email;
+      const uid = decoded.sub; // ✅ FIXED
 
       const formData = {};
       const formElements = this.elements;
+
       for (let element of formElements) {
-          if (element.name) {
-              formData[element.name] = element.value;
-          }
+        if (element.name) {
+          formData[element.name] = element.value;
+        }
       }
 
-      await db.collection("users").doc(uid).update({
-          personalDetails: formData
-      });
+      try {
+        await fetch("http://localhost:3000/savePersonal", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: uid,
+            data: formData,
+          }),
+        });
 
-      document.getElementById("success-message").style.display = "block";
-      window.parent.postMessage({ section: "personal" }, "*");
-  });
+        document.getElementById("success-message").style.display = "block";
+        window.parent.postMessage({ section: "personal" }, "*");
+      } catch (err) {
+        console.error("Error saving data:", err);
+      }
+    });
 
-  // Notify parent for progress bar
-  document.getElementById("save-btn").addEventListener("click", function () {
+  // ===============================
+  // 📊 PROGRESS BAR TRIGGER
+  // ===============================
+  document
+    .getElementById("save-btn")
+    .addEventListener("click", function () {
       window.parent.postMessage("sectionSaved", "*");
-  });
+    });
 </script>
   </body>
 </html>

@@ -1,226 +1,250 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bank Details</title>
-    <link rel="shortcut icon" href="../Assets/logo.jpg" type="image/x-icon">
+    <link rel="shortcut icon" href="../Assets/logo.jpg" type="image/x-icon" />
 
     <!-- Firebase (ONLY DB) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f7f9;
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        background: #f4f7f9;
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+      }
 
-        .container {
-            width: 95%;
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            background: white;
-        }
+      .container {
+        width: 95%;
+        max-width: 1200px;
+        margin: 50px auto;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        background: white;
+      }
 
-        form label {
-            display: block;
-            margin-top: 15px;
-            text-align: left;
-            font-size: 16px;
-        }
+      form label {
+        display: block;
+        margin-top: 15px;
+        text-align: left;
+        font-size: 16px;
+      }
 
-        input {
-            width: 95%;
-            padding: 10px;
-            margin-top: 5px;
-            border-radius: 5px;
-            border: 2px solid #939393;
-            font-size: 16px;
-        }
+      input {
+        width: 95%;
+        padding: 10px;
+        margin-top: 5px;
+        border-radius: 5px;
+        border: 2px solid #939393;
+        font-size: 16px;
+      }
 
-        .error {
-            color: red;
-            font-size: 14px;
-            text-align: left;
-            margin-top: 5px;
-        }
+      .error {
+        color: red;
+        font-size: 14px;
+        text-align: left;
+        margin-top: 5px;
+      }
 
-        button {
-            background-color: #e67e22;
-            color: white;
-            padding: 8px 12px;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            border-radius: 5px;
-            display: block;
-            margin: 20px auto;
-        }
+      button {
+        background-color: #e67e22;
+        color: white;
+        padding: 8px 12px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        border-radius: 5px;
+        display: block;
+        margin: 20px auto;
+      }
 
-        .message {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 5px;
-            background: #d4edda;
-            color: #155724;
-        }
+      .message {
+        display: none;
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 5px;
+        background: #d4edda;
+        color: #155724;
+      }
     </style>
-</head>
+  </head>
 
-<body>
-
-<div class="container">
-    <form id="bank-form">
-
-        <label>Bank Name:
-            <input type="text" id="bank_name" required>
+  <body>
+    <div class="container">
+      <form id="bank-form">
+        <label
+          >Bank Name:
+          <input type="text" id="bank_name" required />
         </label>
 
-        <label>IFSC Code:
-            <input type="text" id="ifsc_code" maxlength="11" required>
-            <div class="error" id="ifsc-error"></div>
+        <label
+          >IFSC Code:
+          <input type="text" id="ifsc_code" maxlength="11" required />
+          <div class="error" id="ifsc-error"></div>
         </label>
 
-        <label>Account Number:
-            <input type="text" id="account_number" required>
-            <div class="error" id="account-error"></div>
+        <label
+          >Account Number:
+          <input type="text" id="account_number" required />
+          <div class="error" id="account-error"></div>
         </label>
 
-        <label>Annual Income:
-            <input type="text" id="annual_income" required>
-            <div class="error" id="income-error"></div>
+        <label
+          >Annual Income:
+          <input type="text" id="annual_income" required />
+          <div class="error" id="income-error"></div>
         </label>
 
         <button type="submit">Save</button>
-    </form>
+      </form>
 
-    <div class="message" id="success-msg">
+      <div class="message" id="success-msg">
         Bank details saved successfully
+      </div>
     </div>
-</div>
 
-<script>
+    <script>
+      // ===============================
+      // 🔐 AUTH CHECK
+      // ===============================
+      function parseJwt(token) {
+        return JSON.parse(atob(token.split(".")[1]));
+      }
 
-    // ===============================
-    // 🔐 COGNITO AUTH CHECK
-    // ===============================
-    function parseJwt(token) {
-        return JSON.parse(atob(token.split('.')[1]));
-    }
+      const token = localStorage.getItem("idToken");
 
-    const token = localStorage.getItem("idToken");
-
-    if (!token) {
+      if (!token) {
         window.top.location.href = "../../Login/login.html";
-    }
+      }
 
-    let decoded;
-    try {
+      let decoded;
+      try {
         decoded = parseJwt(token);
 
         const now = Math.floor(Date.now() / 1000);
         if (decoded.exp < now) {
-            localStorage.clear();
-            window.top.location.href = "../../Login/login.html";
+          localStorage.clear();
+          window.top.location.href = "../../Login/login.html";
         }
-
-    } catch (e) {
+      } catch (e) {
         localStorage.clear();
         window.top.location.href = "../../Login/login.html";
-    }
+      }
 
-    const userId = decoded.email;
+      const userId = decoded.sub; // IMPORTANT (same as other pages)
 
-    // ===============================
-    // 🔥 FIREBASE (ONLY DB)
-    // ===============================
-    const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_DOMAIN",
-        projectId: "YOUR_PROJECT_ID"
-    };
+      // ===============================
+      // 📥 LOAD DATA FROM DYNAMO
+      // ===============================
+      async function loadBankData() {
+        try {
+          const res = await fetch(`http://localhost:3000/getUser/${userId}`);
+          const data = await res.json();
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+          if (data.bankDetails) {
+            document.getElementById("bank_name").value =
+              data.bankDetails.bank_name || "";
 
-    const userDocRef = db.collection("users").doc(userId);
+            document.getElementById("ifsc_code").value =
+              data.bankDetails.ifsc_code || "";
 
-    // ===============================
-    // 📥 LOAD DATA
-    // ===============================
-    userDocRef.get().then(doc => {
-        if (doc.exists && doc.data().bankDetails) {
-            const data = doc.data().bankDetails;
+            document.getElementById("account_number").value =
+              data.bankDetails.account_number || "";
 
-            document.getElementById("bank_name").value = data.bank_name || "";
-            document.getElementById("ifsc_code").value = data.ifsc_code || "";
-            document.getElementById("account_number").value = data.account_number || "";
-            document.getElementById("annual_income").value = data.annual_income || "";
+            document.getElementById("annual_income").value =
+              data.bankDetails.annual_income || "";
+          }
+        } catch (err) {
+          console.error("Load Error:", err);
         }
-    });
+      }
 
-    // ===============================
-    // 💾 SAVE DATA
-    // ===============================
-    document.getElementById("bank-form").addEventListener("submit", function (e) {
+      // ===============================
+      // 💾 SAVE DATA TO DYNAMO
+      // ===============================
+      document
+        .getElementById("bank-form")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
 
-        e.preventDefault();
+          const bank_name = document.getElementById("bank_name").value.trim();
+          const ifsc_code = document
+            .getElementById("ifsc_code")
+            .value.trim()
+            .toUpperCase();
+          const account_number = document
+            .getElementById("account_number")
+            .value.trim();
+          const annual_income = document
+            .getElementById("annual_income")
+            .value.trim();
 
-        const bank_name = document.getElementById("bank_name").value.trim();
-        const ifsc_code = document.getElementById("ifsc_code").value.trim().toUpperCase();
-        const account_number = document.getElementById("account_number").value.trim();
-        const annual_income = document.getElementById("annual_income").value.trim();
+          let valid = true;
 
-        let valid = true;
+          document.getElementById("ifsc-error").textContent = "";
+          document.getElementById("account-error").textContent = "";
+          document.getElementById("income-error").textContent = "";
 
-        // Reset errors
-        document.getElementById("ifsc-error").textContent = "";
-        document.getElementById("account-error").textContent = "";
-        document.getElementById("income-error").textContent = "";
-
-        if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc_code)) {
+          if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc_code)) {
             document.getElementById("ifsc-error").textContent = "Invalid IFSC";
             valid = false;
-        }
+          }
 
-        if (!/^\d{8,18}$/.test(account_number)) {
-            document.getElementById("account-error").textContent = "Invalid account number";
+          if (!/^\d{8,18}$/.test(account_number)) {
+            document.getElementById("account-error").textContent =
+              "Invalid account number";
             valid = false;
-        }
+          }
 
-        if (!/^\d+$/.test(annual_income)) {
-            document.getElementById("income-error").textContent = "Only numbers allowed";
+          if (!/^\d+$/.test(annual_income)) {
+            document.getElementById("income-error").textContent =
+              "Only numbers allowed";
             valid = false;
-        }
+          }
 
-        if (!valid) return;
+          if (!valid) return;
 
-        userDocRef.set({
-            bankDetails: {
-                bank_name,
-                ifsc_code,
-                account_number,
-                annual_income
+          try {
+            const res = await fetch("http://localhost:3000/saveBank", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                data: {
+                  bank_name,
+                  ifsc_code,
+                  account_number,
+                  annual_income,
+                },
+              }),
+            });
+
+            const result = await res.json();
+
+            if (result.success) {
+              document.getElementById("success-msg").style.display = "block";
+
+              // notify parent
+              window.parent.postMessage({ section: "bank" }, "*");
             }
-        }, { merge: true })
-        .then(() => {
-            document.getElementById("success-msg").style.display = "block";
-
-            // notify parent
-            window.parent.postMessage({ section: "bank" }, "*");
+          } catch (err) {
+            console.error("Save Error:", err);
+            alert("Failed to save bank details");
+          }
         });
-    });
 
-</script>
-
-</body>
+      // ===============================
+      // 🚀 INIT
+      // ===============================
+      document.addEventListener("DOMContentLoaded", loadBankData);
+    </script>
+  </body>
 </html>

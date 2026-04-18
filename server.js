@@ -1,124 +1,178 @@
-import express from "express";
-import bodyParser from "body-parser";
-import cors from "cors";
-import { InitiateAuthCommand } from "@aws-sdk/client-cognito-identity-provider";
-import {
-  CognitoIdentityProviderClient,
-  SignUpCommand,
-} from "@aws-sdk/client-cognito-identity-provider";
+// ===============================
+// 🚀 IMPORTS
+// ===============================
+const express = require("express");
+const AWS = require("aws-sdk");
+const cors = require("cors");
 
-// ✅ CREATE APP FIRST
+// ===============================
+// 🚀 APP SETUP
+// ===============================
 const app = express();
 
-// ✅ MIDDLEWARE
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-// ✅ AWS CLIENT
-const client = new CognitoIdentityProviderClient({
-  region: "eu-north-1",
+// ===============================
+// 🔐 AWS CONFIG
+// ===============================
+AWS.config.update({
+  region: "eu-north-1", // change if needed
+  accessKeyId: "AKIAY4OSU4OS3Q54S4RS",
+  secretAccessKey: "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",
 });
 
-const CLIENT_ID = "1hrccmf1ra61043sc0rl8jslv5";
+const dynamo = new AWS.DynamoDB.DocumentClient();
 
 // ===============================
-// 🚀 REGISTER API
+// 📤 SAVE PERSONAL DETAILS
 // ===============================
-
-app.post("/register", async (req, res) => {
-  const { email, password } = req.body;
-
-  console.log("🔥 BACKEND RECEIVED:", req.body);
-
+app.post("/savePersonal", async (req, res) => {
   try {
-    const command = new SignUpCommand({
-      ClientId: CLIENT_ID,
-      Username: email,
-      Password: password,
-      UserAttributes: [{ Name: "email", Value: email }],
-    });
+    const { userId, data } = req.body;
 
-    await client.send(command);
-
-    return res.status(200).json({
-      success: true,
-      message: "Registration successful",
-    });
-
-  } catch (err) {
-    console.error("Register error:", err.name);
-
-    if (err.name === "UsernameExistsException") {
-      return res.status(400).json({
-        success: false,
-        message: "User already exists. Please login.",
-      });
-    }
-
-    return res.status(400).json({
-      success: false,
-      message: err.message || "Registration failed",
-    });
-  }
-});
-
-// ===============================
-// 🔐 LOGIN API
-// ===============================
-
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-
-  console.log("🔥 LOGIN REQUEST:", req.body);
-
-  try {
-    const command = new InitiateAuthCommand({
-      AuthFlow: "USER_PASSWORD_AUTH",
-      ClientId: CLIENT_ID,
-      AuthParameters: {
-        USERNAME: email,
-        PASSWORD: password,
+    const params = {
+      TableName: "users",
+      Key: { userId },
+      UpdateExpression: "SET personalDetails = :p",
+      ExpressionAttributeValues: {
+        ":p": data,
       },
-    });
+    };
 
-    const response = await client.send(command);
+    await dynamo.update(params).promise();
 
-    return res.status(200).json({
-      success: true,
-      message: "Login successful",
-      token: response.AuthenticationResult.AccessToken,
-      idToken: response.AuthenticationResult.IdToken,
-      refreshToken: response.AuthenticationResult.RefreshToken,
-    });
-
+    res.send({ success: true });
   } catch (err) {
-    console.error("Login error:", err.name);
-
-    if (err.name === "NotAuthorizedException") {
-      return res.status(401).json({
-        success: false,
-        message: "Incorrect email or password",
-      });
-    }
-
-    if (err.name === "UserNotFoundException") {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    return res.status(400).json({
-      success: false,
-      message: err.message || "Login failed",
-    });
+    console.error("Save Error:", err);
+    res.status(500).send({ error: "Failed to save data" });
   }
 });
 
 // ===============================
-// ▶ START SERVER
+// 📥 GET USER DATA
 // ===============================
+app.get("/getUser/:userId", async (req, res) => {
+  try {
+    const params = {
+      TableName: "users",
+      Key: { userId: req.params.userId },
+    };
 
-app.listen(3000, () => {
-  console.log("🚀 Server running on http://localhost:3000");
+    const result = await dynamo.get(params).promise();
+
+    res.send(result.Item || {});
+  } catch (err) {
+    console.error("Fetch Error:", err);
+    res.status(500).send({ error: "Failed to fetch data" });
+  }
+});
+
+// ===============================
+// 📤 SAVE EDUCATION DETAILS
+// ===============================
+app.post("/saveEducation", async (req, res) => {
+  try {
+    const { userId, data } = req.body;
+
+    const params = {
+      TableName: "users",
+      Key: { userId },
+      UpdateExpression: "SET education = :e",
+      ExpressionAttributeValues: {
+        ":e": data,
+      },
+    };
+
+    await dynamo.update(params).promise();
+
+    res.send({ success: true });
+  } catch (err) {
+    console.error("Education Save Error:", err);
+    res.status(500).send({ error: "Failed to save education data" });
+  }
+});
+
+// ===============================
+// 📤 SAVE BANK DETAILS
+// ===============================
+app.post("/saveBank", async (req, res) => {
+  try {
+    const { userId, data } = req.body;
+
+    const params = {
+      TableName: "users",
+      Key: { userId },
+      UpdateExpression: "SET bankDetails = :b",
+      ExpressionAttributeValues: {
+        ":b": data,
+      },
+    };
+
+    await dynamo.update(params).promise();
+
+    res.send({ success: true });
+  } catch (err) {
+    console.error("Bank Save Error:", err);
+    res.status(500).send({ error: "Failed to save bank data" });
+  }
+});
+
+// ===============================
+// 📤 SAVE DIVYANG DETAILS
+// ===============================
+app.post("/saveDivyang", async (req, res) => {
+  try {
+    const { userId, data } = req.body;
+
+    const params = {
+      TableName: "users",
+      Key: { userId },
+      UpdateExpression: "SET divyangDetails = :d",
+      ExpressionAttributeValues: {
+        ":d": data,
+      },
+    };
+
+    await dynamo.update(params).promise();
+
+    res.send({ success: true });
+  } catch (err) {
+    console.error("Divyang Save Error:", err);
+    res.status(500).send({ error: "Failed to save divyang data" });
+  }
+});
+
+// ===============================
+// 📤 SAVE EMPLOYMENT DETAILS
+// ===============================
+app.post("/saveEmployment", async (req, res) => {
+  try {
+    const { userId, data } = req.body;
+
+    const params = {
+      TableName: "users",
+      Key: { userId },
+      UpdateExpression: "SET employmentDetails = :e",
+      ExpressionAttributeValues: {
+        ":e": data,
+      },
+    };
+
+    await dynamo.update(params).promise();
+
+    res.send({ success: true });
+  } catch (err) {
+    console.error("Employment Save Error:", err);
+    res.status(500).send({ error: "Failed to save employment data" });
+  }
+});
+
+// ===============================
+// 🟢 START SERVER
+// ===============================
+const PORT = 3000;
+
+app.listen(PORT, () => {
+  console.log(`✅ Server running on http://localhost:${PORT}`);
 });
