@@ -70,73 +70,58 @@ function generateSchemesTable() {
 
 // Function to fetch and display applicants for a specific scheme
 async function viewApplicants(schemeId) {
-    const loader = document.getElementById("loader");
-    loader.classList.remove("hidden"); // Show loader
+  const loader = document.getElementById("loader");
+  loader.classList.remove("hidden");
 
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            // Check if the user is an admin
-            if (user.uid === "i0VvTjgBQ3TBE2C7ctAf9wNOeFC2") { // Replace with your admin UID
-                try {
-                    const usersRef = collection(db, "users");
-                    const snapshot = await getDocs(usersRef);
+  try {
+    // 🔥 fetch all users from backend
+    const res = await fetch("http://localhost:3000/getAllUsers");
+    const users = await res.json();
 
-                    const applicants = []; // Reset applicants array
+    let applicants = [];
 
-                    snapshot.forEach(docSnap => {
-                        const data = docSnap.data();
-                        const appliedSchemes = data.appliedSchemes || [];
+    users.forEach(user => {
+      const appliedSchemes = user.appliedSchemes || [];
 
-                        // Filter users who applied for the selected scheme and do not have a state field
-                        appliedSchemes.forEach(scheme => {
-                            if (scheme.id === schemeId && !scheme.state) {
-                                applicants.push({
-                                    name: `${data.personalDetails?.first_name || "N/A"} ${data.personalDetails?.last_name || ""}`,
-                                    udid: data.personalDetails?.udid || "N/A",
-                                    application: scheme.applicationPdf || "#",
-                                    uid: docSnap.id // Use document ID as the UID
-                                });
-                            }
-                        });
-                    });
-
-                    loader.classList.add("hidden"); // Hide loader after data is fetched
-
-                    // Replace table with applicants table
-                    document.querySelector(".container").innerHTML = `
-                        <button class="backButton" id="backButton">← Back</button>
-                        <h2>Applicants for Scheme ID: ${schemeId}</h2>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th class="view">#</th>
-                                    <th>Applicant Name</th>
-                                    <th>UDID</th>
-                                    <th class="view">View Application</th>
-                                </tr>
-                            </thead>
-                            <tbody id="applicantsTable">
-                                ${generateApplicantsTable(applicants, schemeId)}
-                            </tbody>
-                        </table>
-                    `;
-
-                    // Add event listener for the back button
-                    document.getElementById("backButton").addEventListener("click", loadSchemesPage);
-                } catch (error) {
-                    console.error("Error fetching applicants:", error);
-                    alert("Failed to load applicants. Please check your permissions or try again later.");
-                    loader.classList.add("hidden"); // Hide loader in case of error
-                }
-            } else {
-                alert("You do not have permission to view this data.");
-                loader.classList.add("hidden"); // Hide loader
-            }
-        } else {
-            alert("User not authenticated.");
-            loader.classList.add("hidden"); // Hide loader
+      appliedSchemes.forEach(scheme => {
+        if (scheme.id == schemeId && !scheme.state) {
+          applicants.push({
+            name: `${user.personalDetails?.first_name || "N/A"} ${user.personalDetails?.last_name || ""}`,
+            udid: user.personalDetails?.udid || "N/A",
+            uid: user.userId,
+          });
         }
+      });
     });
+
+    loader.classList.add("hidden");
+
+    // 🔁 SAME UI (unchanged)
+    document.querySelector(".container").innerHTML = `
+      <button class="backButton" id="backButton">← Back</button>
+      <h2>Applicants for Scheme ID: ${schemeId}</h2>
+      <table>
+        <thead>
+          <tr>
+            <th class="view">#</th>
+            <th>Applicant Name</th>
+            <th>UDID</th>
+            <th class="view">View Application</th>
+          </tr>
+        </thead>
+        <tbody id="applicantsTable">
+          ${generateApplicantsTable(applicants, schemeId)}
+        </tbody>
+      </table>
+    `;
+
+    document.getElementById("backButton").addEventListener("click", loadSchemesPage);
+
+  } catch (err) {
+    console.error(err);
+    alert("Failed to load applicants");
+    loader.classList.add("hidden");
+  }
 }
 
 // Function to generate applicants table dynamically
