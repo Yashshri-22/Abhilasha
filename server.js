@@ -195,61 +195,107 @@ app.post("/updateSchemes", async (req, res) => {
 });
 
 // ===============================
-// 📤 APPLY SCHEME
+// 🟢 APPLY SCHEME (MAIN FIX)
 // ===============================
 app.post("/applyScheme", async (req, res) => {
   try {
     const { userId, scheme } = req.body;
 
-    // Get existing user
-    const getParams = {
-      TableName: "users",
-      Key: { userId },
-    };
+    // ===============================
+    // 📥 GET USER
+    // ===============================
+    const userRes = await dynamo
+      .get({
+        TableName: "users",
+        Key: { userId },
+      })
+      .promise();
 
-    const user = await dynamo.get(getParams).promise();
-    const appliedSchemes = user.Item?.appliedSchemes || [];
+    if (!userRes.Item) {
+      return res.send({ success: false, message: "User not found" });
+    }
 
-    // Check duplicate
+    const user = userRes.Item;
+    let appliedSchemes = user.appliedSchemes || [];
+
+    // ❌ already applied check
     if (appliedSchemes.some((s) => s.id === scheme.id)) {
       return res.send({ success: false, message: "Already applied" });
     }
 
-    // Max 4 schemes
-    if (appliedSchemes.length >= 4) {
-      return res.send({ success: false, message: "Limit reached" });
-    }
-
-    const updatedSchemes = [
-      ...appliedSchemes,
-      {
-        id: scheme.id,
-        appliedDate: new Date().toISOString(),
-        status: [
-          {
-            remark: "Application Submitted",
-            sentBy: "System",
-            date: new Date().toISOString(),
-          },
-        ],
-      },
-    ];
-
-    const updateParams = {
-      TableName: "users",
-      Key: { userId },
-      UpdateExpression: "SET appliedSchemes = :a",
-      ExpressionAttributeValues: {
-        ":a": updatedSchemes,
-      },
+    // ===============================
+    // ✅ ADD TO USER
+    // ===============================
+    const newScheme = {
+      id: scheme.id,
+      appliedDate: new Date().toISOString(),
+      status: [
+        {
+          remark: "Application Submitted",
+          sentBy: "System",
+          date: new Date().toISOString(),
+        },
+      ],
     };
 
-    await dynamo.update(updateParams).promise();
+    appliedSchemes.push(newScheme);
 
+    await dynamo
+      .update({
+        TableName: "users",
+        Key: { userId },
+        UpdateExpression: "SET appliedSchemes = :a",
+        ExpressionAttributeValues: {
+          ":a": appliedSchemes,
+        },
+      })
+      .promise();
+
+    // ===============================
+    // 🔥 ADD TO ADMIN WAITING
+    // ===============================
+    const ADMIN_ID = "603c697c-50f1-700a-4899-78c040e32d6c";
+
+    const adminRes = await dynamo
+      .get({
+        TableName: "users",
+        Key: { userId: ADMIN_ID },
+      })
+      .promise();
+
+    let admin = adminRes.Item || {};
+    let waiting = admin.waiting || [];
+
+    const name = user.personalDetails?.first_name || "User";
+    const udid = user.divyangDetails?.udid || "N/A";
+
+    waiting.push({
+      userId,
+      schemeId: scheme.id,
+      name,
+      udid,
+      scheme: `Scheme ${scheme.id}`,
+      date: new Date().toISOString(),
+    });
+
+    await dynamo
+      .update({
+        TableName: "users",
+        Key: { userId: ADMIN_ID },
+        UpdateExpression: "SET waiting = :w",
+        ExpressionAttributeValues: {
+          ":w": waiting,
+        },
+      })
+      .promise();
+
+    // ===============================
+    // ✅ DONE
+    // ===============================
     res.send({ success: true });
   } catch (err) {
     console.error("Apply Error:", err);
-    res.status(500).send({ error: "Failed to apply scheme" });
+    res.status(500).send({ success: false });
   }
 });
 
@@ -338,6 +384,191 @@ app.get("/getAllUsers", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send({ error: "Failed to fetch users" });
+  }
+});
+
+// ===============================
+// 🔥 UPDATE SCHEME STATUS (FULL)
+// ===============================
+app.post("/updateSchemeStatus", async (req, res) => {
+  try {
+    const { userId, schemeId, status } = req.body;
+
+    const ADMIN_ID = "603c697c-50f1-700a-4899-78c040e32d6c";
+
+    // ===============================
+    // 📥 GET USER
+    // ===============================
+    const userRes = await dynamo
+      .get({
+        TableName: "users",
+        Key: { userId },
+      })
+      .promise();
+
+    if (!userRes.Item) {
+      return res.send({ success: false, message: "User not found" });
+    }
+
+    let user = userRes.Item;
+    let schemes = user.appliedSchemes || [];
+
+    const index = schemes.findIndex((s) => s.id == schemeId);
+
+    if (index === -1) {
+      return res.send({ success: false, message: "Scheme not found" });
+    }
+
+    const date = new Date().toISOString();
+
+    // ===============================
+    // ✅ UPDATE USER SIDE
+    // ===============================
+    schemes[index].state = status;
+
+    schemes[index].status = schemes[index].status || [];
+    schemes[index].status.push({
+      remark: status.toUpperCase(),
+      date,
+      sentBy: "Admin",
+    });
+
+    await dynamo
+      .update({
+        TableName: "users",
+        Key: { userId },
+        UpdateExpression: "SET appliedSchemes = :a",
+        ExpressionAttributeValues: {
+          ":a": schemes,
+        },
+      })
+      .promise();
+
+    // ===============================
+    // 📥 GET ADMIN
+    // ===============================
+    const adminRes = await dynamo
+      .get({
+        TableName: "users",
+        Key: { userId: ADMIN_ID },
+      })
+      .promise();
+
+    let admin = adminRes.Item || {};
+
+    let waiting = admin.waiting || [];
+    let approved = admin.approved || [];
+    let rejected = admin.rejected || [];
+
+    // ===============================
+    // 🔍 FIND ENTRY IN WAITING
+    // ===============================
+    // ===============================
+    // 🔄 MOVE ENTRY BETWEEN ARRAYS
+    // ===============================
+    const idx = waiting.findIndex(
+      (u) =>
+        String(u.userId) === String(userId) &&
+        Number(u.schemeId) === Number(schemeId),
+    );
+
+    if (idx !== -1) {
+      const entry = waiting[idx];
+
+      // remove from waiting
+      waiting.splice(idx, 1);
+
+      // add to correct list
+      if (status === "approved") {
+        approved.push({
+          ...entry,
+          status: "approved",
+          actionDate: new Date().toISOString(),
+        });
+      } else if (status === "rejected") {
+        rejected.push({
+          ...entry,
+          status: "rejected",
+          actionDate: new Date().toISOString(),
+        });
+      }
+    } else {
+      console.log("Entry not found in waiting:", userId, schemeId);
+    }
+
+    // ===============================
+    // 💾 UPDATE ADMIN
+    // ===============================
+    await dynamo
+      .update({
+        TableName: "users",
+        Key: { userId: ADMIN_ID },
+        UpdateExpression: "SET waiting = :w, approved = :a, rejected = :r",
+        ExpressionAttributeValues: {
+          ":w": waiting,
+          ":a": approved,
+          ":r": rejected,
+        },
+      })
+      .promise();
+
+    res.send({ success: true });
+  } catch (err) {
+    console.error("FULL UPDATE ERROR:", err);
+    res.status(500).send({ success: false });
+  }
+});
+
+// ===============================
+// 💬 ADD REMARK
+// ===============================
+app.post("/addRemark", async (req, res) => {
+  try {
+    const { userId, schemeId, remark } = req.body;
+
+    const result = await dynamo
+      .get({
+        TableName: "users",
+        Key: { userId },
+      })
+      .promise();
+
+    if (!result.Item) {
+      return res.send({ success: false });
+    }
+
+    let schemes = result.Item.appliedSchemes || [];
+
+    const index = schemes.findIndex((s) => s.id == schemeId);
+
+    if (index === -1) {
+      return res.send({ success: false });
+    }
+
+    const date = new Date().toISOString();
+
+    schemes[index].status = schemes[index].status || [];
+    schemes[index].status.push({
+      remark,
+      date,
+      sentBy: "Admin",
+    });
+
+    await dynamo
+      .update({
+        TableName: "users",
+        Key: { userId },
+        UpdateExpression: "SET appliedSchemes = :a",
+        ExpressionAttributeValues: {
+          ":a": schemes,
+        },
+      })
+      .promise();
+
+    res.send({ success: true });
+  } catch (err) {
+    console.error("Remark Error:", err);
+    res.status(500).send({ success: false });
   }
 });
 

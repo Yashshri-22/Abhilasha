@@ -264,47 +264,37 @@
         const remarkText = document
           .querySelector(".remark-textarea")
           .value.trim();
+
         if (!remarkText) {
-          alert("Please enter a remark before sending.");
+          alert("Please enter a remark");
           return;
         }
 
         try {
-          const userDocRef = doc(db, "users", currentUserId);
-          const userSnapshot = await getDoc(userDocRef);
+          const res = await fetch("http://localhost:3000/addRemark", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId: currentUserId,
+              schemeId: currentSchemeId,
+              remark: remarkText,
+            }),
+          });
 
-          if (userSnapshot.exists()) {
-            const userData = userSnapshot.data();
-            const appliedSchemes = userData.appliedSchemes || [];
+          const data = await res.json();
 
-            // Find the scheme in the applied schemes array
-            const schemeIndex = appliedSchemes.findIndex(
-              (scheme) => scheme.id === currentSchemeId,
-            );
-            if (schemeIndex !== -1) {
-              const currentDate = new Date().toISOString().split("T")[0]; // Get the current date
-
-              // Ensure the status array exists, then append the new remark
-              appliedSchemes[schemeIndex].status =
-                appliedSchemes[schemeIndex].status || [];
-              appliedSchemes[schemeIndex].status.push({
-                remark: remarkText,
-                date: currentDate,
-              });
-
-              await updateDoc(userDocRef, { appliedSchemes }); // Update the Firestore document
-              alert("Remark added successfully.");
-              document.querySelector(".remark-textarea").value = ""; // Clear the textarea
-              document.getElementById("remarkSection").style.display = "none"; // Hide the remark section
-            } else {
-              alert("Scheme not found for the user.");
-            }
+          if (data.success) {
+            alert("Remark added successfully");
+            document.querySelector(".remark-textarea").value = "";
+            document.getElementById("remarkSection").style.display = "none";
           } else {
-            alert("User data not found.");
+            alert("Failed to add remark");
           }
         } catch (error) {
           console.error("Error adding remark:", error);
-          alert("An error occurred while adding the remark. Please try again.");
+          alert("Error adding remark");
         }
       }
       window.sendRemark = sendRemark;
@@ -312,49 +302,34 @@
       // Function to update the state field in Firestore
       async function updateState(newState) {
         if (!currentUserId || !currentSchemeId) {
-          alert("User ID or Scheme ID is missing. Cannot update state.");
+          alert("User ID or Scheme ID missing");
           return;
         }
 
         try {
-          const userDocRef = doc(db, "users", currentUserId);
-          const userSnapshot = await getDoc(userDocRef);
+          const res = await fetch("http://localhost:3000/updateSchemeStatus", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId: currentUserId,
+              schemeId: currentSchemeId,
+              status: newState,
+            }),
+          });
 
-          if (userSnapshot.exists()) {
-            const userData = userSnapshot.data();
-            const appliedSchemes = userData.appliedSchemes || [];
+          const data = await res.json();
 
-            // Find the scheme in the applied schemes array
-            const schemeIndex = appliedSchemes.findIndex(
-              (scheme) => scheme.id === currentSchemeId,
-            );
-            if (schemeIndex !== -1) {
-              const currentDate = new Date().toISOString().split("T")[0]; // Get the current date
-
-              // Update the state field
-              appliedSchemes[schemeIndex].state = newState;
-
-              // Append the status to the status array
-              appliedSchemes[schemeIndex].status =
-                appliedSchemes[schemeIndex].status || [];
-              appliedSchemes[schemeIndex].status.push({
-                status: newState,
-                date: currentDate,
-              });
-
-              await updateDoc(userDocRef, { appliedSchemes }); // Update the Firestore document
-              alert(`State updated to '${newState}' successfully.`);
-            } else {
-              alert("Scheme not found for the user.");
-            }
+          if (data.success) {
+            alert(`Application ${newState}`);
+            location.reload();
           } else {
-            alert("User data not found.");
+            alert("Failed to update status");
           }
         } catch (error) {
           console.error("Error updating state:", error);
-          alert(
-            "An error occurred while updating the state. Please try again.",
-          );
+          alert("Error updating status");
         }
       }
 
@@ -446,34 +421,23 @@
       // Fetch user data from Firebase and populate the page
       async function fetchUserData(userId, schemeId) {
         try {
-          const userDoc = doc(db, "users", userId);
-          const userSnapshot = await getDoc(userDoc);
+          const res = await fetch(`http://localhost:3000/getUser/${userId}`);
+          const userData = await res.json();
 
-          if (userSnapshot.exists()) {
-            const userData = userSnapshot.data();
-            console.log("Fetched User Data:", userData); // Debugging: Log the fetched data
-            populateUserData(userData, schemeId);
-
-            // Fetch document URLs from Supabase
-            loadS3Documents(userId);
-          } else {
-            console.error("No user data found for the given ID.");
-            alert("No user data found for the given ID.");
+          if (!userData || Object.keys(userData).length === 0) {
+            alert("No user data found");
+            return;
           }
+
+          console.log("Fetched User Data:", userData);
+
+          populateUserData(userData, schemeId);
+          loadS3Documents(userId);
         } catch (error) {
           console.error("Error fetching user data:", error);
-          if (error.code === "permission-denied") {
-            alert(
-              "You do not have permission to access this data. Please contact the administrator.",
-            );
-          } else {
-            alert(
-              "An error occurred while fetching user data. Please try again later.",
-            );
-          }
+          alert("Error fetching user data");
         }
       }
-
       // Populate the page with user data
       function populateUserData(data, schemeId) {
         document.getElementById("firstName").innerText =
@@ -585,18 +549,26 @@
       }
 
       // Check authentication state and fetch data
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          console.log("Authenticated user:", user.email); // Debugging: Log authenticated user
-          getUserIdFromQueryAndFetchData();
-        } else {
-          console.error("User not authenticated.");
-          alert(
-            "You are not authenticated. Please log in to access this page.",
-          );
-          window.location.href = "../login/login.html"; // Redirect to login page
+      function checkAuthAndLoad() {
+        const token = localStorage.getItem("idToken");
+
+        if (!token) {
+          alert("Not logged in");
+          window.location.href = "../login/login.html";
+          return;
         }
-      });
+
+        getUserIdFromQueryAndFetchData();
+      }
+
+      window.onload = () => {
+        const remarkSection = document.getElementById("remarkSection");
+        if (remarkSection) {
+          remarkSection.style.display = "none";
+        }
+
+        checkAuthAndLoad();
+      };
     </script>
   </body>
 </html>
