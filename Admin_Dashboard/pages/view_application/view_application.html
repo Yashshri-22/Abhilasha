@@ -307,17 +307,20 @@
         }
 
         try {
-          const res = await fetch("http://13.51.170.94:3000/updateSchemeStatus", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
+          const res = await fetch(
+            "http://13.51.170.94:3000/updateSchemeStatus",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId: currentUserId,
+                schemeId: currentSchemeId,
+                status: newState,
+              }),
             },
-            body: JSON.stringify({
-              userId: currentUserId,
-              schemeId: currentSchemeId,
-              status: newState,
-            }),
-          });
+          );
 
           const data = await res.json();
 
@@ -389,7 +392,16 @@
         return `https://${bucketName}.s3.${region}.amazonaws.com/documents/${uid}/${fileName}`;
       }
 
-      function loadS3Documents(uid) {
+      async function checkFileExists(url) {
+        try {
+          const res = await fetch(url, { method: "HEAD" });
+          return res.ok;
+        } catch (err) {
+          return false;
+        }
+      }
+
+      async function loadS3Documents(uid) {
         const documents = [
           { key: "disabilityCertificate", file: "disability-certificate.pdf" },
           { key: "aadhaarCard", file: "aadhaar-card.pdf" },
@@ -400,7 +412,7 @@
           { key: "mbocwwCertificate", file: "mbocww-certificate.pdf" },
         ];
 
-        documents.forEach((doc) => {
+        for (const doc of documents) {
           const url = getS3Url(uid, doc.file);
 
           const statusElement = document.getElementById(doc.key);
@@ -408,14 +420,17 @@
             "view" + doc.key.charAt(0).toUpperCase() + doc.key.slice(1),
           );
 
-          // Assume file exists (since uploaded)
-          statusElement.innerText = "Uploaded";
-          viewButton.style.display = "inline-block";
+          const exists = await checkFileExists(url);
 
-          viewButton.onclick = () => {
-            window.open(url, "_blank");
-          };
-        });
+          if (exists) {
+            statusElement.innerText = "Uploaded";
+            viewButton.style.display = "inline-block";
+            viewButton.onclick = () => window.open(url, "_blank");
+          } else {
+            statusElement.innerText = "Not Uploaded";
+            viewButton.style.display = "none";
+          }
+        }
       }
 
       // Fetch user data from Firebase and populate the page
