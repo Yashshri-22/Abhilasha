@@ -75,7 +75,7 @@ async function viewApplicants(schemeId) {
 
   try {
     // 🔥 fetch all users from backend
-    const res = await fetch("http://13.61.14.149:3000/getAllUsers");
+    const res = await fetch("http://13.51.170.94:3000/getAllUsers");
     const users = await res.json();
 
     let applicants = [];

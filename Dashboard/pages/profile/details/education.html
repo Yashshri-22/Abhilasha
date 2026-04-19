@@ -421,7 +421,7 @@
       const userId = decoded.sub;
 
       try {
-        const res = await fetch(`http://13.61.14.149:3000/getUser/${userId}`);
+        const res = await fetch(`http://13.51.170.94:3000/getUser/${userId}`);
         const data = await res.json();
 
         const educationData = data.education || {};
@@ -593,7 +593,7 @@
         }
 
         try {
-          const res = await fetch("http://13.61.14.149:3000/saveEducation", {
+          const res = await fetch("http://13.51.170.94:3000/saveEducation", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

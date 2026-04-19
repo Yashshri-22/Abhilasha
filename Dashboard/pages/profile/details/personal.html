@@ -298,128 +298,142 @@
     </div>
 
     <script>
-  function previewPhoto(event) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        document.getElementById("profile-preview").src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
-  // Restrict numeric-only fields
-  document.querySelectorAll("input[type='text']").forEach((input) => {
-    input.addEventListener("input", function () {
-      if (["pin_code", "aadhar", "phone", "alt_phone"].includes(this.name)) {
-        this.value = this.value.replace(/\D/g, "");
+      function previewPhoto(event) {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            document.getElementById("profile-preview").src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
       }
-    });
-  });
 
-  // ===============================
-  // 📥 LOAD DATA FROM DYNAMODB
-  // ===============================
-  async function loadData() {
-    const token = localStorage.getItem("idToken");
-
-    if (!token) {
-      window.top.location.href = "../../Login/login.html";
-      return;
-    }
-
-    let decoded;
-    try {
-      decoded = JSON.parse(atob(token.split(".")[1]));
-    } catch (e) {
-      window.top.location.href = "../../Login/login.html";
-      return;
-    }
-
-    const uid = decoded.sub; // ✅ FIXED (Cognito ID)
-
-    try {
-      const res = await fetch(`http://13.61.14.149:3000/getUser/${uid}`);
-      const user = await res.json();
-
-      if (user && user.personalDetails) {
-        const data = user.personalDetails;
-
-        for (let key in data) {
-          if (document.querySelector(`[name="${key}"]`)) {
-            document.querySelector(`[name="${key}"]`).value = data[key];
+      // Restrict numeric-only fields
+      document.querySelectorAll("input[type='text']").forEach((input) => {
+        input.addEventListener("input", function () {
+          if (
+            ["pin_code", "aadhar", "phone", "alt_phone"].includes(this.name)
+          ) {
+            this.value = this.value.replace(/\D/g, "");
           }
+        });
+      });
+
+      // ===============================
+      // 📥 LOAD DATA FROM DYNAMODB
+      // ===============================
+      async function loadData() {
+        const token = localStorage.getItem("idToken");
+
+        if (!token) {
+          window.top.location.href = "../../Login/login.html";
+          return;
+        }
+
+        let decoded;
+        try {
+          decoded = JSON.parse(atob(token.split(".")[1]));
+        } catch (e) {
+          window.top.location.href = "../../Login/login.html";
+          return;
+        }
+
+        const uid = decoded.sub; // ✅ FIXED (Cognito ID)
+
+        try {
+          const res = await fetch(`http://13.51.170.94:3000/getUser/${uid}`);
+          const user = await res.json();
+
+          if (user && user.personalDetails) {
+            const data = user.personalDetails;
+
+            for (let key in data) {
+              if (document.querySelector(`[name="${key}"]`)) {
+                document.querySelector(`[name="${key}"]`).value = data[key];
+              }
+            }
+          }
+        } catch (err) {
+          console.error("Error loading data:", err);
         }
       }
-    } catch (err) {
-      console.error("Error loading data:", err);
-    }
-  }
 
-  loadData();
+      loadData();
 
-  // ===============================
-  // 📤 SAVE DATA TO DYNAMODB
-  // ===============================
-  document
-    .getElementById("personal-form")
-    .addEventListener("submit", async function (event) {
-      event.preventDefault();
+      // ===============================
+      // 📤 SAVE DATA TO DYNAMODB
+      // ===============================
+      document
+        .getElementById("personal-form")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
 
-      const token = localStorage.getItem("idToken");
+          const token = localStorage.getItem("idToken");
 
-      if (!token) {
-        window.top.location.href = "../../Login/login.html";
-        return;
-      }
+          if (!token) {
+            window.top.location.href = "../../Login/login.html";
+            return;
+          }
 
-      let decoded;
-      try {
-        decoded = JSON.parse(atob(token.split(".")[1]));
-      } catch (e) {
-        window.top.location.href = "../../Login/login.html";
-        return;
-      }
+          let decoded;
+          try {
+            decoded = JSON.parse(atob(token.split(".")[1]));
+          } catch (e) {
+            window.top.location.href = "../../Login/login.html";
+            return;
+          }
 
-      const uid = decoded.sub; // ✅ FIXED
+          const uid = decoded.sub; // ✅ FIXED
 
-      const formData = {};
-      const formElements = this.elements;
+          const formData = {};
+          const formElements = this.elements;
 
-      for (let element of formElements) {
-        if (element.name) {
-          formData[element.name] = element.value;
-        }
-      }
+          for (let element of formElements) {
+            if (element.name) {
+              formData[element.name] = element.value;
+            }
+          }
 
-      try {
-        await fetch("http://13.61.14.149:3000/savePersonal", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: uid,
-            data: formData,
-          }),
+          try {
+            const res = await fetch("http://13.51.170.94:3000/savePersonal", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId: uid,
+                data: formData,
+              }),
+            });
+
+            const result = await res.json();
+
+            if (!res.ok) {
+              console.error("❌ Save failed:", result);
+              alert(
+                "Failed to save data: " + (result.error || "Unknown error"),
+              );
+              return;
+            }
+
+            console.log("✅ Saved:", result);
+
+            document.getElementById("success-message").style.display = "block";
+            window.parent.postMessage({ section: "personal" }, "*");
+          } catch (err) {
+            console.error("Error saving data:", err);
+          }
         });
 
-        document.getElementById("success-message").style.display = "block";
-        window.parent.postMessage({ section: "personal" }, "*");
-      } catch (err) {
-        console.error("Error saving data:", err);
-      }
-    });
-
-  // ===============================
-  // 📊 PROGRESS BAR TRIGGER
-  // ===============================
-  document
-    .getElementById("save-btn")
-    .addEventListener("click", function () {
-      window.parent.postMessage("sectionSaved", "*");
-    });
-</script>
+      // ===============================
+      // 📊 PROGRESS BAR TRIGGER
+      // ===============================
+      document
+        .getElementById("save-btn")
+        .addEventListener("click", function () {
+          window.parent.postMessage("sectionSaved", "*");
+        });
+    </script>
   </body>
 </html>

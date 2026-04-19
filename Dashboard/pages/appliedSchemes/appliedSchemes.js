@@ -82,7 +82,7 @@ async function loadAppliedSchemes() {
   if (!userId) return;
 
   try {
-    const res = await fetch(`http://13.61.14.149:3000/getUser/${userId}`);
+    const res = await fetch(`http://13.51.170.94:3000/getUser/${userId}`);
     const data = await res.json();
 
     const appliedSchemes = data.appliedSchemes || [];
@@ -131,7 +131,7 @@ async function openDialog(schemeId) {
   if (!userId) return;
 
   try {
-    const res = await fetch(`http://13.61.14.149:3000/getUser/${userId}`);
+    const res = await fetch(`http://13.51.170.94:3000/getUser/${userId}`);
     const data = await res.json();
 
     const appliedSchemes = data.appliedSchemes || [];
@@ -174,7 +174,7 @@ async function cancelScheme(schemeId) {
   if (!userId) return;
 
   try {
-    const res = await fetch(`http://13.61.14.149:3000/getUser/${userId}`);
+    const res = await fetch(`http://13.51.170.94:3000/getUser/${userId}`);
     const data = await res.json();
 
     let appliedSchemes = data.appliedSchemes || [];
@@ -194,7 +194,7 @@ async function cancelScheme(schemeId) {
       cancelledDate: new Date().toISOString(),
     });
 
-    await fetch("http://13.61.14.149:3000/updateSchemes", {
+    await fetch("http://13.51.170.94:3000/updateSchemes", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
