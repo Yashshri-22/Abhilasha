@@ -44,7 +44,7 @@ loginButton.addEventListener("click", async (e) => {
     if (userData.role === "admin") {
       localStorage.setItem("idToken", token);
       alert("Login successful");
-      window.location.href = "../admin_dashboard/admin_dashboard.html";
+      window.location.href = "../Admin_Dashboard/admin_dashboard.html";
     } else {
       alert("Access denied: Not an admin");
     }
