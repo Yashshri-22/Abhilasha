@@ -173,7 +173,7 @@ async function applyScheme(schemeName) {
   // CALL BACKEND
   // ===============================
   try {
-    const res = await fetch("http://13.51.170.94:3000/applyScheme", {
+    const res = await fetch("http://abhilasha-alb-261362901.eu-north-1.elb.amazonaws.com/applyScheme", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -99,7 +99,7 @@
 
 // const loginUser = async (email, password) => {
 //   try {
-//     const response = await fetch("http://13.51.170.94:3000/login", {
+//     const response = await fetch("http://abhilasha-alb-261362901.eu-north-1.elb.amazonaws.com/login", {
 //       method: "POST",
 //       headers: {
 //         "Content-Type": "application/json",

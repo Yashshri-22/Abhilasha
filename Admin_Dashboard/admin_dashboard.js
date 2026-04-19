@@ -14,7 +14,7 @@ async function checkAdminAccess() {
     const userId = decoded.sub;
 
     // 🔥 fetch user from DynamoDB
-    const res = await fetch(`http://13.51.170.94:3000/getUser/${userId}`);
+    const res = await fetch(`http://abhilasha-alb-261362901.eu-north-1.elb.amazonaws.com/getUser/${userId}`);
     
     if (!res.ok) throw new Error("User fetch failed");
 

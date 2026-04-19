@@ -198,7 +198,7 @@
       // ===============================
       async function loadDivyangData() {
         try {
-          const res = await fetch(`http://13.51.170.94:3000/getUser/${userId}`);
+          const res = await fetch(`http://abhilasha-alb-261362901.eu-north-1.elb.amazonaws.com/getUser/${userId}`);
           const data = await res.json();
 
           if (data.divyangDetails) {
@@ -254,7 +254,7 @@
           }
 
           try {
-            const res = await fetch("http://13.51.170.94:3000/saveDivyang", {
+            const res = await fetch("http://abhilasha-alb-261362901.eu-north-1.elb.amazonaws.com/saveDivyang", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",

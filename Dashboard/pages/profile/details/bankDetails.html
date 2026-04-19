@@ -144,7 +144,7 @@
       // ===============================
       async function loadBankData() {
         try {
-          const res = await fetch(`http://13.51.170.94:3000/getUser/${userId}`);
+          const res = await fetch(`http://abhilasha-alb-261362901.eu-north-1.elb.amazonaws.com/getUser/${userId}`);
           const data = await res.json();
 
           if (data.bankDetails) {
@@ -211,7 +211,7 @@
           if (!valid) return;
 
           try {
-            const res = await fetch("http://13.51.170.94:3000/saveBank", {
+            const res = await fetch("http://abhilasha-alb-261362901.eu-north-1.elb.amazonaws.com/saveBank", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",

@@ -342,7 +342,7 @@
         const uid = decoded.sub; // ✅ FIXED (Cognito ID)
 
         try {
-          const res = await fetch(`http://13.51.170.94:3000/getUser/${uid}`);
+          const res = await fetch(`http://abhilasha-alb-261362901.eu-north-1.elb.amazonaws.com/getUser/${uid}`);
           const user = await res.json();
 
           if (user && user.personalDetails) {
@@ -396,7 +396,7 @@
           }
 
           try {
-            const res = await fetch("http://13.51.170.94:3000/savePersonal", {
+            const res = await fetch("http://abhilasha-alb-261362901.eu-north-1.elb.amazonaws.com/savePersonal", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",

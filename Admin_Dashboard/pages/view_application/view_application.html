@@ -271,7 +271,7 @@
         }
 
         try {
-          const res = await fetch("http://13.51.170.94:3000/addRemark", {
+          const res = await fetch("http://abhilasha-alb-261362901.eu-north-1.elb.amazonaws.com/addRemark", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -308,7 +308,7 @@
 
         try {
           const res = await fetch(
-            "http://13.51.170.94:3000/updateSchemeStatus",
+            "http://abhilasha-alb-261362901.eu-north-1.elb.amazonaws.com/updateSchemeStatus",
             {
               method: "POST",
               headers: {
@@ -436,7 +436,7 @@
       // Fetch user data from Firebase and populate the page
       async function fetchUserData(userId, schemeId) {
         try {
-          const res = await fetch(`http://13.51.170.94:3000/getUser/${userId}`);
+          const res = await fetch(`http://abhilasha-alb-261362901.eu-north-1.elb.amazonaws.com/getUser/${userId}`);
           const userData = await res.json();
 
           if (!userData || Object.keys(userData).length === 0) {

@@ -18,7 +18,7 @@ loginButton.addEventListener("click", async (e) => {
 
   try {
     // 🔥 Call your backend login (Cognito)
-    const res = await fetch("http://13.51.170.94:3000/loginAdmin", {
+    const res = await fetch("http://abhilasha-alb-261362901.eu-north-1.elb.amazonaws.com/loginAdmin", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -38,7 +38,7 @@ loginButton.addEventListener("click", async (e) => {
     const userId = decoded.sub;
 
     // 🔥 Check role from DynamoDB
-    const userRes = await fetch(`http://13.51.170.94:3000/getUser/${userId}`);
+    const userRes = await fetch(`http://abhilasha-alb-261362901.eu-north-1.elb.amazonaws.com/getUser/${userId}`);
     const userData = await userRes.json();
 
     if (userData.role === "admin") {

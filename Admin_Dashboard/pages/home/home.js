@@ -67,7 +67,7 @@ async function showContent(title, category) {
 
   try {
     // 🔥 Fetch all users (you need this API)
-    const res = await fetch("http://13.51.170.94:3000/getAllUsers");
+    const res = await fetch("http://abhilasha-alb-261362901.eu-north-1.elb.amazonaws.com/getAllUsers");
     const users = await res.json();
 
     console.log("USERS:", users); // 🔥 ADD THIS
@@ -159,7 +159,7 @@ async function showContent(title, category) {
 
 async function loadDashboardCounts() {
   try {
-    const res = await fetch("http://13.51.170.94:3000/getAllUsers");
+    const res = await fetch("http://abhilasha-alb-261362901.eu-north-1.elb.amazonaws.com/getAllUsers");
     const users = await res.json();
 
     let total = 0;
