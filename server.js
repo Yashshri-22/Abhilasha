@@ -16,12 +16,8 @@ app.use(express.json());
 const path = require("path");
 
 // Serve static files FROM Abhilasha folder
-app.use(express.static(path.join(__dirname)));
-
-// Root route → open home.html
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "home/home.html"));
-});
+// serve everything exactly like Apache
+app.use("/", express.static(__dirname));
 
 // ===============================
 // 🔐 AWS CONFIG
