@@ -15,10 +15,10 @@ app.use(express.json());
 
 const path = require("path");
 
-// Serve frontend
-app.use(express.static(__dirname));
+// Serve static files FROM Abhilasha folder
+app.use(express.static(path.join(__dirname)));
 
-// Default route
+// Root route → open home.html
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "home/home.html"));
 });
