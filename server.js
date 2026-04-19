@@ -16,11 +16,11 @@ app.use(express.json());
 const path = require("path");
 
 // Serve frontend
-app.use(express.static(path.join(__dirname, "Abhilasha")));
+app.use(express.static(__dirname));
 
-// Default route (optional but recommended)
+// Default route
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "Abhilasha/home/home.html"));
+  res.sendFile(path.join(__dirname, "home/home.html"));
 });
 
 // ===============================
